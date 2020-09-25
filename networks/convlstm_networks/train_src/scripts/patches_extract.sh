@@ -1,7 +1,7 @@
 dataset=$1 # could be cv or lem
-dataset_source='SAR' # could be SAR or Optical
+#dataset_source='SAR' # could be SAR or Optical
 #dataset_source='Optical' # could be SAR or Optical
-
+dataset_source=$2
 # ==== EXTRACT PATCHES
 
 cd ../../../../dataset/dataset/patches_extract_script

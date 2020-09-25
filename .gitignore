@@ -133,3 +133,5 @@ dmypy.json
 *.png
 *.directory
 *.zip
+*.txt
+*metadata.txt

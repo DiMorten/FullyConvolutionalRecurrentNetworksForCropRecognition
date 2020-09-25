@@ -97,8 +97,8 @@ deb.prints(args.patch_step_test)
 
 
 #========= overwrite for direct execution of this py file
-dataset='cv'
-sensor_source='SAR'
+dataset='lm'
+sensor_source='Optical'
 
 if dataset=='cv':
 	args.path="../../../dataset/dataset/cv_data/"
@@ -2330,7 +2330,7 @@ class NetModel(NetObject):
 							np.expand_dims(batch['test']['label'].argmax(axis=4),axis=4).astype(np.int8))		# Accumulated epoch
 
 					data.patches['test']['prediction'][idx0:idx1]=self.graph.predict(
-						batch['test']['in'].astype(np.float32),batch_size=self.batch['test']['size'])*13
+						batch['test']['in'].astype(np.float32),batch_size=self.batch['test']['size'])
 			#====================METRICS GET================================================#
 			deb.prints(data.patches['test']['label'].shape)	
 			deb.prints(data.patches['test']['prediction'].dtype)
@@ -2452,7 +2452,7 @@ class ModelLoadEachBatch(NetModel):
 flag = {"data_create": 2, "label_one_hot": True}
 if __name__ == '__main__':
 
-	premade_split_patches_load=True
+	premade_split_patches_load=False
 	
 
 	deb.prints(premade_split_patches_load)
@@ -2498,8 +2498,8 @@ if __name__ == '__main__':
 	#adam = Adam(lr=0.001, beta_1=0.9)
 	
 	adam = Adagrad(0.01)
-	#model = NetModel(epochs=args.epochs, patch_len=args.patch_len,
-	model = ModelLoadEachBatch(epochs=args.epochs, patch_len=args.patch_len,
+	#model = ModelLoadEachBatch(epochs=args.epochs, patch_len=args.patch_len,
+	model = NetModel(epochs=args.epochs, patch_len=args.patch_len,
 					 patch_step_train=args.patch_step_train, eval_mode=args.eval_mode,
 					 batch_size_train=args.batch_size_train,batch_size_test=args.batch_size_test,
 					 patience=args.patience,t_len=args.t_len,class_n=args.class_n,channel_n=args.channel_n,path=args.path,
@@ -2586,12 +2586,7 @@ if __name__ == '__main__':
 			data.patches['test']=data.randomly_pick_samples_from_set(data.patches['test'], 2000)
 			deb.prints(data.patches['train']['in'].shape)
 			deb.prints(data.patches['test']['in'].shape)
-		
-		# store patches to npy (in a separate folder!)
-		
-		patchesStorage.store(data.patches)
-		#patchesStorage.saveLabel(self.path[split]+'patches_in.npy', patches['in'])
-
+	
 		print("================== PATCHES WERE STORED =====================")
 
 
@@ -2603,10 +2598,14 @@ if __name__ == '__main__':
 		data.patches['val']=data.patchesLoad('val_bckndfixed')
 		data.patches['train']=data.patchesLoad('train_bckndfixed')
 		data.patches['test']=data.patchesLoad('test_bckndfixed')
+		deb.prints(data.patches['val']['label'].shape)
+		model.loss_weights=np.load(data.path_patches_bckndfixed+'loss_weights.npy')
+
 
 		store_patches_each_sample=False
-		patchesStorageEachSample = PatchesStorageEachSample(data.path['v'])
 		if store_patches_each_sample==True:
+			patchesStorageEachSample = PatchesStorageEachSample(data.path['v'])
+		
 			print("===== STORING THE LOADED PATCHES AS EACH SAMPLE IN SEPARATE FILE ======")
 			
 			patchesStorageEachSample.store(data.patches)
@@ -2617,11 +2616,10 @@ if __name__ == '__main__':
 			assert data.patches['test']['in'].all()==patchesStorageEachSample.load()['test']['in'].all()
 			assert data.patches['val']['in'].all()==patchesStorageEachSample.load()['val']['in'].all()
 
-		data.partition=patchesStorageEachSample.loadPartition()
+			###data.partition=patchesStorageEachSample.loadPartition()
 		#deb.prints(data.partition)
 		#pdb.set_trace()
-		deb.prints(data.patches['val']['label'].shape)
-		model.loss_weights=np.load(data.path_patches_bckndfixed+'loss_weights.npy')
+
 	deb.prints(data.patches['train']['label'].shape)
 
 	#deb.prints_vars_memory()
