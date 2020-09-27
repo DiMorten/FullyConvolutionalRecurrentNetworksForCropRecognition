@@ -641,7 +641,7 @@ elif dataset=='lm':
 elif dataset=='lm_optical':
 	exp_id=1
 	experiment_groups=[[
-		'prediction_bconvlstm.npy'
+		'prediction_bunetconvlstm_ok.npy'
 	]]
 print("Experiment groups",experiment_groups)
 if load_metrics==False:

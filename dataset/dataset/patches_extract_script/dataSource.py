@@ -158,7 +158,7 @@ class OpticalSource(DataSource):
 		#full_ims[full_ims>8500]=8500
 		return full_ims
 	def im_load(self,filename):
-		return np.load(filename)[:,:,(3,1,0)] #3,1,0 means nir,g,b.
+		return np.load(filename)[:,:,(3,1,0)] #3,1,0 means nir,g,b. originally it was bands 2,3,4,8. So now I pick 8,3,2
 class Dataset(object):
 	def __init__(self,path,im_h,im_w,class_n):
 		self.path=path
