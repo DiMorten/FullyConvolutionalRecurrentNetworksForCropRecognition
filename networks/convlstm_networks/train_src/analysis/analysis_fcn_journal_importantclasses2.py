@@ -481,7 +481,7 @@ def experiments_plot(metrics,experiment_list,dataset,
 	
 	plt.show()
 
-dataset='lm_optical'
+dataset='lm_optical_clouds'
 load_metrics=False
 small_classes_ignore=False
 #mode='global'
@@ -642,6 +642,11 @@ elif dataset=='lm_optical':
 	exp_id=1
 	experiment_groups=[[
 		'prediction_bunetconvlstm_ok.npy'
+	]]
+elif dataset=='lm_optical_clouds':
+	exp_id=1
+	experiment_groups=[[
+		'prediction.npy'
 	]]
 print("Experiment groups",experiment_groups)
 if load_metrics==False:

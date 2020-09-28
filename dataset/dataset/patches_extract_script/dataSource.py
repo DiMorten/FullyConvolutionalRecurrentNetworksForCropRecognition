@@ -159,6 +159,12 @@ class OpticalSource(DataSource):
 		return full_ims
 	def im_load(self,filename):
 		return np.load(filename)[:,:,(3,1,0)] #3,1,0 means nir,g,b. originally it was bands 2,3,4,8. So now I pick 8,3,2
+class OpticalSourceWithClouds(OpticalSource):
+	def __init__(self):
+		
+		super().__init__()
+		self.name='OpticalSourceWithClouds'
+
 class Dataset(object):
 	def __init__(self,path,im_h,im_w,class_n):
 		self.path=path
@@ -192,9 +198,18 @@ class LEM(Dataset):
 		super().__init__(path,im_h,im_w,class_n)
 
 	def addDataSource(self,dataSource):
+		deb.prints(dataSource.name)
 		self.dataSource = dataSource
 		if self.dataSource.name == 'SARSource':
 			self.im_list=['20170612_S1', '20170706_S1', '20170811_S1', '20170916_S1', '20171010_S1', '20171115_S1', '20171209_S1', '20180114_S1', '20180219_S1', '20180315_S1', '20180420_S1', '20180514_S1', '20180619_S1']
+			self.label_list=self.im_list.copy()
 		elif self.dataSource.name == 'OpticalSource':
 			self.im_list=['20170729_S2_10m','20170803_S2_10m','20170907_S2_10m','20171017_S2_10m','20171022_S2_10m','20180420_S2_10m','20180430_S2_10m','20180510_S2_10m','20180614_S2_10m','20180619_S2_10m','20180624_S2_10m']
+			self.label_list=self.im_list.copy()
+		elif self.dataSource.name == 'OpticalSourceWithClouds':
+			self.im_list=['20170729_S2_10m','20170803_S2_10m','20170907_S2_10m','20171017_S2_10m','20171022_S2_10m','20180301_S2_10m','20180420_S2_10m','20180430_S2_10m','20180510_S2_10m','20180614_S2_10m','20180619_S2_10m','20180624_S2_10m']
+			self.label_list=['20170729_S2_10m','20170803_S2_10m','20170907_S2_10m','20171017_S2_10m','20171022_S2_10m','20180315_S2_10m','20180420_S2_10m','20180430_S2_10m','20180510_S2_10m','20180614_S2_10m','20180619_S2_10m','20180624_S2_10m']
 		self.t_len=len(self.im_list)
+		
+		deb.prints(self.t_len)
+

@@ -28,3 +28,6 @@ Timestamp:1599874525.14. Model: ConvLSTM_seq2seq_bi. Training time: 14792.88
 Timestamp:1599890104.98. Model: Unet3D. Training time: 4678.97
 Timestamp:1600163721.42. Model: BAtrousGAPConvLSTM. Training time: 33699.85
 Timestamp:1600239145.06. Model: BUnet4ConvLSTM. Training time: 5858.73
+Timestamp:1601013752.36. Model: BUnet4ConvLSTM. Training time: 6142.09
+Timestamp:1601053697.68. Model: BUnet4ConvLSTM. Training time: 4089.3
+Timestamp:1601257567.31. Model: BUnet4ConvLSTM. Training time: 5262.03

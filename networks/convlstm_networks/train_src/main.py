@@ -99,6 +99,7 @@ deb.prints(args.patch_step_test)
 #========= overwrite for direct execution of this py file
 dataset='lm'
 sensor_source='Optical'
+sensor_source='OpticalWithClouds'
 
 if dataset=='cv':
 	args.path="../../../dataset/dataset/cv_data/"
@@ -114,6 +115,9 @@ elif dataset=='lm':
 	elif sensor_source=='Optical':
 		args.channel_n=3
 		args.t_len=11
+	elif sensor_source=='OpticalWithClouds':
+		args.channel_n=3
+		args.t_len=12
 args.stop_epoch=-1
 args.model_type='BUnet4ConvLSTM'
 #args.model_type='ConvLSTM_seq2seq'

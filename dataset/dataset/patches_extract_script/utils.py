@@ -29,7 +29,7 @@ from abc import ABC, abstractmethod
 import pdb
 # Local
 import deb
-from dataSource import DataSource, SARSource, OpticalSource, Dataset, LEM, CampoVerde
+from dataSource import DataSource, SARSource, OpticalSource, Dataset, LEM, CampoVerde, OpticalSourceWithClouds
 
 def mask_train_test_switch_from_path(path):
 	mask=cv2.imread(path)
@@ -243,9 +243,6 @@ class DataForNet(object):
 
 		#========================== GET IMAGE FILENAMES =================================#
 		#im_filenames=self.im_filenames_get()
-		im_filenames=self.dataset.im_list
-
-
 
 		patch={}
 		patch["train_mask"]=cv2.imread(self.conf["train"]["mask"]["dir"],-1).astype(np.uint8)
@@ -257,11 +254,11 @@ class DataForNet(object):
 		patch["full_label_ims"]=np.zeros((self.conf["t_len"],)+self.conf["im_3d_size"][0:2])
 
 		#for t_step in range(0,self.conf["t_len"]):
-		deb.prints(im_filenames)
+		deb.prints(self.dataset.im_list)
 
 
 		#=======================LOAD, NORMALIZE AND MASK FULL IMAGES ================#
-		patch=self.im_load(patch,im_filenames,add_id)
+		patch=self.im_load(patch,self.dataset.im_list,self.dataset.label_list,add_id)
 
 		patch["full_ims"] = self.dataSource.clip_undesired_values(patch["full_ims"])
 		
@@ -350,13 +347,13 @@ class DataForNet(object):
 		return im_names
 		self.im_patches_npy_multitemporal_from_npy_store2(im_names,label_type)
 
-	def im_load(self,patch,names,add_id):
+	def im_load(self,patch,im_names,label_names,add_id):
 		fname=sys._getframe().f_code.co_name
 		for t_step in range(0,self.conf["t_len"]):	
 			print(t_step,add_id)
-			deb.prints(self.conf["in_npy_path"]+names[t_step]+".npy")
+			deb.prints(self.conf["in_npy_path"]+im_names[t_step]+".npy")
 			#patch["full_ims"][t_step] = np.load(self.conf["in_npy_path"]+names[t_step]+".npy")[:,:,:2]
-			patch["full_ims"][t_step] = self.dataSource.im_load(self.conf["in_npy_path"]+names[t_step]+".npy")
+			patch["full_ims"][t_step] = self.dataSource.im_load(self.conf["in_npy_path"]+im_names[t_step]+".npy")
 			#patch["full_ims"][t_step] = np.load(self.conf["in_npy_path"]+names[t_step]+".npy")
 			deb.prints
 			deb.prints(np.average(patch["full_ims"][t_step]))
@@ -364,9 +361,9 @@ class DataForNet(object):
 			deb.prints(np.min(patch["full_ims"][t_step]))
 			
 			#deb.prints(patch["full_ims"][t_step].dtype)
-			patch["full_label_ims"][t_step] = cv2.imread(self.conf["path"]+self.label_folder+"/"+names[t_step]+".tif",0)
-			print(self.conf["path"]+self.label_folder+"/"+names[t_step]+".tif")
-			deb.prints(self.conf["path"]+self.label_folder+"/"+names[t_step]+".tif")
+			patch["full_label_ims"][t_step] = cv2.imread(self.conf["path"]+self.label_folder+"/"+label_names[t_step]+".tif",0)
+			print(self.conf["path"]+self.label_folder+"/"+label_names[t_step]+".tif")
+			deb.prints(self.conf["path"]+self.label_folder+"/"+label_names[t_step]+".tif")
 			deb.prints(np.unique(patch["full_label_ims"][t_step],return_counts=True))
 			#for band in range(0,self.conf["band_n"]):
 			#	patch["full_ims_train"][t_step,:,:,band][patch["train_mask"]!=1]=-1

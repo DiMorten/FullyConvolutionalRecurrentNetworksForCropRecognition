@@ -3,10 +3,10 @@ id='cvish_sar'
 
 #dataset='campo_verde'
 dataset='lm'
-
+dataSource='OpticalWithClouds'
 
 # ==== EXTRACT PATCHES
-. patches_extract.sh $dataset
+. patches_extract.sh $dataset $dataSource
 # ===== USE MODEL
 
 
