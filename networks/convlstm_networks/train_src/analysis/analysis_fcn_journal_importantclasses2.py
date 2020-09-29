@@ -482,6 +482,8 @@ def experiments_plot(metrics,experiment_list,dataset,
 	plt.show()
 
 dataset='lm_optical_clouds'
+#dataset='lm'
+
 load_metrics=False
 small_classes_ignore=False
 #mode='global'
@@ -535,7 +537,9 @@ elif dataset=='lm':
 		['prediction_ConvLSTM_seq2seq_redoingz2.npy',
 		'prediction_ConvLSTM_seq2seq_bi_redoingz2.npy',
 		'prediction_DenseNetTimeDistributed_128x2_redoingz2.npy'],]
-	exp_id=8 # choose 4 for thesis and journal paper
+	#exp_id=8 # choose 4 for thesis and journal paper
+	exp_id=4 # choose 4 for thesis and journal paper
+	
 	if exp_id==2:
 		experiment_groups=[['prediction_ConvLSTM_seq2seq_bi_batch16_full.npy',
 			'prediction_DenseNetTimeDistributed_128x2_batch16_full.npy',
@@ -646,7 +650,7 @@ elif dataset=='lm_optical':
 elif dataset=='lm_optical_clouds':
 	exp_id=1
 	experiment_groups=[[
-		'prediction.npy'
+		'prediction_bunetconvlstm_clouds.npy'
 	]]
 print("Experiment groups",experiment_groups)
 if load_metrics==False:

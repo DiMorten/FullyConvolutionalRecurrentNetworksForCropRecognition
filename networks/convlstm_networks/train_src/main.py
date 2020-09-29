@@ -117,7 +117,7 @@ elif dataset=='lm':
 		args.t_len=11
 	elif sensor_source=='OpticalWithClouds':
 		args.channel_n=3
-		args.t_len=12
+		args.t_len=13
 args.stop_epoch=-1
 args.model_type='BUnet4ConvLSTM'
 #args.model_type='ConvLSTM_seq2seq'
