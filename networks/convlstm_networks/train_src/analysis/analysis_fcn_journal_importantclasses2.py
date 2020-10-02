@@ -146,11 +146,13 @@ def experiment_analyze(small_classes_ignore,dataset='cv',
 	prediction_path=path+prediction_filename
 	path_test='../../../../dataset/dataset/'+dataset+'_data/patches_bckndfixed/test/'
 	
-	predictionsLoader = PredictionsLoaderNPY()
-	predictions, label_test = predictionsLoader.loadPredictions(prediction_path,path+'labels.npy')
-	
-	#predictionsLoader = PredictionsLoaderModel(path_test)
-	#predictions, label_test = predictionsLoader.loadPredictions(path[:-3] + 'model/'+dataset+'/'+prediction_filename)
+	prediction_type = 'model'
+	if prediction_type=='npy':
+		predictionsLoader = PredictionsLoaderNPY()
+		predictions, label_test = predictionsLoader.loadPredictions(prediction_path,path+'labels.npy')
+	elif prediction_type=='model':	
+		predictionsLoader = PredictionsLoaderModel(path_test)
+		predictions, label_test = predictionsLoader.loadPredictions(path[:-3] + 'model/'+dataset+'/'+prediction_filename)
 	
 	#predictions=np.load(prediction_path, allow_pickle=True)
 	#label_test=np.load(path+'labels.npy', allow_pickle=True)
@@ -481,7 +483,7 @@ def experiments_plot(metrics,experiment_list,dataset,
 	
 	plt.show()
 
-dataset='lm_optical_clouds'
+dataset='cv'
 #dataset='lm'
 
 load_metrics=False
@@ -507,7 +509,7 @@ if dataset=='cv':
 		['prediction_ConvLSTM_seq2seq_redoingz2.npy',
 		'prediction_ConvLSTM_seq2seq_bi_redoing3.npy',
 		'prediction_DenseNetTimeDistributed_128x2_redoing3.npy']]
-	exp_id=1 # 4 for thesis and journal
+	exp_id=2 # 4 for thesis and journal
 
 	if exp_id==1:
 		experiment_groups=[[#'prediction_deeplabv3plus_v3plus2.npy',
@@ -521,7 +523,11 @@ if dataset=='cv':
 	# 		'prediction_FCN_ConvLSTM_seq2seq_bi_skip_lauras2.npy',
 	# ##		'prediction_ConvLSTM_seq2seq_bi_redoing.npy',
 	# 		'prediction_DenseNetTimeDistributed_128x2_redoingz2.npy']]
-
+	if exp_id==2:
+		experiment_groups=[[#'prediction_deeplabv3plus_v3plus2.npy',
+			'model_best_BUnet4ConvLSTM.h5',
+			'model_best_UNet3D.h5',
+			'model_best_BUnet4ConvLSTM_SkipLSTM.h5']]
 elif dataset=='lm':
 
 	experiment_groups=[[
@@ -650,7 +656,14 @@ elif dataset=='lm_optical':
 elif dataset=='lm_optical_clouds':
 	exp_id=1
 	experiment_groups=[[
-		'prediction_bunetconvlstm_clouds.npy'
+		#'prediction_bunetconvlstm_clouds.npy',
+		'prediction_bunetconvlstm_clouds2.npy',
+		'prediction_unet3d_clouds.npy'
+	]]
+	experiment_groups=[[
+		#'prediction_bunetconvlstm_clouds.npy',
+		'prediction_bunetconvlstm_clouds2.npy',
+		'prediction_bunetconvlstm_clouds_febnew.npy'
 	]]
 print("Experiment groups",experiment_groups)
 if load_metrics==False:

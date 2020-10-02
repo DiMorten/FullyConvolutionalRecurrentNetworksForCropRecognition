@@ -97,35 +97,42 @@ deb.prints(args.patch_step_test)
 
 
 #========= overwrite for direct execution of this py file
-dataset='lm'
-sensor_source='Optical'
-sensor_source='OpticalWithClouds'
+direct_execution=True
+if direct_execution==True:
+	#dataset='cv'
+	dataset='lm'
 
-if dataset=='cv':
-	args.path="../../../dataset/dataset/cv_data/"
-	args.t_len=14
-	args.class_n=12
-elif dataset=='lm':
-	args.path="../../../dataset/dataset/lm_data/"
-	
-	args.class_n=15
-	if sensor_source=='SAR':
-		args.channel_n=2
-		args.t_len=13
-	elif sensor_source=='Optical':
-		args.channel_n=3
-		args.t_len=11
-	elif sensor_source=='OpticalWithClouds':
-		args.channel_n=3
-		args.t_len=13
-args.stop_epoch=-1
-args.model_type='BUnet4ConvLSTM'
-#args.model_type='ConvLSTM_seq2seq'
-#args.model_type='ConvLSTM_seq2seq_bi'
-#args.model_type='DenseNetTimeDistributed_128x2'
-#args.model_type='BAtrousGAPConvLSTM'
-#args.model_type='Unet3D'
+	#sensor_source='Optical'
+	sensor_source='OpticalWithClouds'
+	#sensor_source='SAR'
 
+	if dataset=='cv':
+		args.class_n=12
+		args.path="../../../dataset/dataset/cv_data/"
+		if sensor_source=='SAR':
+			args.t_len=14
+			
+	elif dataset=='lm':
+		args.path="../../../dataset/dataset/lm_data/"
+		
+		args.class_n=15
+		if sensor_source=='SAR':
+			args.channel_n=2
+			args.t_len=13
+		elif sensor_source=='Optical':
+			args.channel_n=3
+			args.t_len=11
+		elif sensor_source=='OpticalWithClouds':
+			args.channel_n=3
+			args.t_len=13
+	args.stop_epoch=-1
+	#args.model_type='BUnet4ConvLSTM'
+	#args.model_type='ConvLSTM_seq2seq'
+	#args.model_type='ConvLSTM_seq2seq_bi'
+	#args.model_type='DenseNetTimeDistributed_128x2'
+	#args.model_type='BAtrousGAPConvLSTM'
+	args.model_type='Unet3D'
+	#args.model_type='BUnet6ConvLSTM'
 
 
 def model_summary_print(s):
@@ -1543,6 +1550,36 @@ class NetModel(NetObject):
 										padding='same'))(out)
 			self.graph = Model(in_im, out)
 			print(self.graph.summary())
+
+		if self.model_type=='BUnet6ConvLSTM':
+
+
+			#fs=32
+			fs=16
+
+			p1=dilated_layer(in_im,fs)			
+			e1 = TimeDistributed(AveragePooling2D((2, 2), strides=(2, 2)))(p1)
+			p2=dilated_layer(e1,fs*2)
+			e2 = TimeDistributed(AveragePooling2D((2, 2), strides=(2, 2)))(p2)
+			p3=dilated_layer(e2,fs*4)
+			e3 = TimeDistributed(AveragePooling2D((2, 2), strides=(2, 2)))(p3)
+
+			x = Bidirectional(ConvLSTM2D(128,3,return_sequences=True,
+					padding="same"),merge_mode='concat')(e3)
+
+			d3 = transpose_layer(x,fs*4)
+			d3 = keras.layers.concatenate([d3, p3], axis=4)
+			d3=dilated_layer(d3,fs*4)
+			d2 = transpose_layer(d3,fs*2)
+			d2 = keras.layers.concatenate([d2, p2], axis=4)
+			d2=dilated_layer(d2,fs*2)
+			d1 = transpose_layer(d2,fs)
+			d1 = keras.layers.concatenate([d1, p1], axis=4)
+			out=dilated_layer(d1,fs)
+			out = TimeDistributed(Conv2D(self.class_n, (1, 1), activation=None,
+										padding='same'))(out)
+			self.graph = Model(in_im, out)
+			print(self.graph.summary())			
 		if self.model_type=='BUnet5ConvLSTM':
 
 
@@ -2312,7 +2349,7 @@ class NetModel(NetObject):
 				print(" ============= EARLY STOP ACHIEVED ===============")
 				print("============= LOADING EARLY STOP BEST WEIGHTS ===============")
 				self.graph.load_weights('weights_best.h5')
-			test_loop_each_epoch=True
+			test_loop_each_epoch=False
 			print('Stop epoch is {}. Current epoch is {}/{}'.format(self.stop_epoch,epoch,self.stop_epoch))
 			deb.prints(self.stop_epoch==epoch)
 			

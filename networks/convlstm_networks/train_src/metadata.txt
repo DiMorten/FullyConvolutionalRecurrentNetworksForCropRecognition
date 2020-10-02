@@ -31,3 +31,11 @@ Timestamp:1600239145.06. Model: BUnet4ConvLSTM. Training time: 5858.73
 Timestamp:1601013752.36. Model: BUnet4ConvLSTM. Training time: 6142.09
 Timestamp:1601053697.68. Model: BUnet4ConvLSTM. Training time: 4089.3
 Timestamp:1601257567.31. Model: BUnet4ConvLSTM. Training time: 5262.03
+Timestamp:1601273961.59. Model: BUnet4ConvLSTM. Training time: 4146.18
+Timestamp:1601404074.95. Model: BUnet4ConvLSTM. Training time: 7337.07
+Timestamp:1601414309.67. Model: BUnet4ConvLSTM. Training time: 5317.29
+Timestamp:1601420429.48. Model: Unet3D. Training time: 3747.24
+Timestamp:1601431384.05. Model: BUnet4ConvLSTM. Training time: 8094.13
+Timestamp:1601451289.12. Model: Unet3D. Training time: 10469.23
+Timestamp:1601537488.57. Model: BUnet4ConvLSTM. Training time: 6291.36
+Timestamp:1601592458.06. Model: Unet3D. Training time: 11298.0

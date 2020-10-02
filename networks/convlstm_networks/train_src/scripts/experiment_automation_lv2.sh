@@ -1,9 +1,10 @@
 KERAS_BACKEND=tensorflow
 id='cvish_sar'
 
-#dataset='campo_verde'
-dataset='lm'
-dataSource='OpticalWithClouds'
+dataset='cv'
+##dataset='lm'
+##dataSource='OpticalWithClouds'
+dataSource='SAR'
 
 # ==== EXTRACT PATCHES
 . patches_extract.sh $dataset $dataSource
