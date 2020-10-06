@@ -92,13 +92,19 @@ def labels_predictions_filter_transform(label_test,predictions,class_n,
 		print("Predictions",predictions.shape)
 		print("Label_test",label_test.shape)
 	return label_test,predictions
+def my_f1_score(label,prediction):
+	f1_values=f1_score(label_test,predictions,average=None)
+	f1_values=f1_values[f1_values!=0]
+	return np.average(f1_values)
 def metrics_get(label_test,predictions,only_basics=False,debug=1, detailed_t=None):
 	if debug>0:
 		print(predictions.shape,predictions.dtype)
 		print(label_test.shape,label_test.dtype)
 
 	metrics={}
-	metrics['f1_score']=f1_score(label_test,predictions,average='macro')
+
+	#metrics['f1_score']=f1_score(label_test,predictions,average='macro')
+	metrics['f1_score']=my_f1_score(label_test,predictions)
 	metrics['overall_acc']=accuracy_score(label_test,predictions)
 	confusion_matrix_=confusion_matrix(label_test,predictions)
 	#print(confusion_matrix_)
