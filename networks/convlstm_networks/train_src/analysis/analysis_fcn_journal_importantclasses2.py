@@ -93,9 +93,10 @@ def labels_predictions_filter_transform(label_test,predictions,class_n,
 		print("Label_test",label_test.shape)
 	return label_test,predictions
 def my_f1_score(label,prediction):
-	f1_values=f1_score(label_test,predictions,average=None)
-	f1_values=f1_values[f1_values!=0]
-	return np.average(f1_values)
+	f1_values=f1_score(label,prediction,average=None)
+	f1_value=np.sum(f1_values)/len(np.unique(label))
+	#print("f1_values",f1_values," f1_value:",f1_value)
+	return f1_value
 def metrics_get(label_test,predictions,only_basics=False,debug=1, detailed_t=None):
 	if debug>0:
 		print(predictions.shape,predictions.dtype)
@@ -103,7 +104,7 @@ def metrics_get(label_test,predictions,only_basics=False,debug=1, detailed_t=Non
 
 	metrics={}
 
-	#metrics['f1_score']=f1_score(label_test,predictions,average='macro')
+	#metrics['f1_score']=f1_score(label_test,predictions,average='macro')	
 	metrics['f1_score']=my_f1_score(label_test,predictions)
 	metrics['overall_acc']=accuracy_score(label_test,predictions)
 	confusion_matrix_=confusion_matrix(label_test,predictions)
@@ -489,7 +490,7 @@ def experiments_plot(metrics,experiment_list,dataset,
 	
 	plt.show()
 
-dataset='cv'
+dataset='lm_optical_clouds'
 #dataset='lm'
 
 load_metrics=False
@@ -666,11 +667,11 @@ elif dataset=='lm_optical_clouds':
 		'prediction_bunetconvlstm_clouds2.npy',
 		'prediction_unet3d_clouds.npy'
 	]]
-	experiment_groups=[[
+	#experiment_groups=[[
 		#'prediction_bunetconvlstm_clouds.npy',
-		'prediction_bunetconvlstm_clouds2.npy',
-		'prediction_bunetconvlstm_clouds_febnew.npy'
-	]]
+	#	'prediction_bunetconvlstm_clouds2.npy',
+	#	'prediction_bunetconvlstm_clouds_febnew.npy'
+	#]]
 print("Experiment groups",experiment_groups)
 if load_metrics==False:
 	experiment_metrics=experiment_groups_analyze(dataset,experiment_groups,
