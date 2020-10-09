@@ -27,7 +27,7 @@ from densnet_timedistributed import DenseNetFCNTimeDistributed
 
 from metrics import fmeasure,categorical_accuracy
 import deb
-from keras_weighted_categorical_crossentropy import weighted_categorical_crossentropy, sparse_accuracy_ignoring_last_label, weighted_categorical_crossentropy_ignoring_last_label
+from keras_weighted_categorical_crossentropy import weighted_categorical_crossentropy, sparse_accuracy_ignoring_last_label, weighted_categorical_crossentropy_ignoring_last_label, categorical_focal_ignoring_last_label
 from keras.models import load_model
 from keras.layers import ConvLSTM2D, ConvGRU2D, UpSampling2D, multiply
 from keras.utils.vis_utils import plot_model
@@ -99,12 +99,12 @@ deb.prints(args.patch_step_test)
 #========= overwrite for direct execution of this py file
 direct_execution=True
 if direct_execution==True:
-	#dataset='cv'
-	dataset='lm'
+	dataset='cv'
+	#dataset='lm'
 
 	#sensor_source='Optical'
-	sensor_source='OpticalWithClouds'
-	#sensor_source='SAR'
+	#sensor_source='OpticalWithClouds'
+	sensor_source='SAR'
 
 	if dataset=='cv':
 		args.class_n=12
@@ -126,12 +126,12 @@ if direct_execution==True:
 			args.channel_n=3
 			args.t_len=13
 	args.stop_epoch=-1
-	#args.model_type='BUnet4ConvLSTM'
+	args.model_type='BUnet4ConvLSTM'
 	#args.model_type='ConvLSTM_seq2seq'
 	#args.model_type='ConvLSTM_seq2seq_bi'
 	#args.model_type='DenseNetTimeDistributed_128x2'
 	#args.model_type='BAtrousGAPConvLSTM'
-	args.model_type='Unet3D'
+	#args.model_type='Unet3D'
 	#args.model_type='BUnet6ConvLSTM'
 
 
@@ -2107,13 +2107,6 @@ class NetModel(NetObject):
 		with open('model_summary.txt','w') as fh:
 			self.graph.summary(line_length=125,print_fn=lambda x: fh.write(x+'\n'))
 		#self.graph.summary(print_fn=model_summary_print)
-	def compile(self, optimizer, loss='binary_crossentropy', metrics=['accuracy',metrics.categorical_accuracy],loss_weights=None):
-		#loss_weighted=weighted_categorical_crossentropy(loss_weights)
-		loss_weighted=weighted_categorical_crossentropy_ignoring_last_label(loss_weights)
-		#sparse_accuracy_ignoring_last_label()
-		self.graph.compile(loss=loss_weighted, optimizer=optimizer, metrics=metrics)
-		#self.graph.compile(loss=sparse_accuracy_ignoring_last_label, optimizer=optimizer, metrics=metrics)
-		#self.graph.compile(loss='categorical_crossentropy', optimizer=optimizer, metrics=metrics)
 	def loss_weights_estimate(self,data):
 		unique,count=np.unique(data.patches['train']['label'].argmax(axis=4),return_counts=True)
 		unique=unique[1:] # No bcknd
@@ -2493,7 +2486,7 @@ class ModelLoadEachBatch(NetModel):
 flag = {"data_create": 2, "label_one_hot": True}
 if __name__ == '__main__':
 
-	premade_split_patches_load=False
+	premade_split_patches_load=True
 	
 
 	deb.prints(premade_split_patches_load)
@@ -2671,8 +2664,13 @@ if __name__ == '__main__':
 
 	metrics=['accuracy']
 	#metrics=['accuracy',fmeasure,categorical_accuracy]
-	model.compile(loss='binary_crossentropy',
-				  optimizer=adam, metrics=metrics,loss_weights=model.loss_weights)
+
+
+	#loss=weighted_categorical_crossentropy_ignoring_last_label(model.loss_weights)
+	loss=categorical_focal_ignoring_last_label(alpha=0.25,gamma=2)
+
+	model.graph.compile(loss=loss,
+				  optimizer=adam, metrics=metrics)
 	model_load=False
 	if model_load:
 		model=load_model('/home/lvc/Documents/Jorg/sbsr/fcn_model/results/seq2_true_norm/models/model_1000.h5')
