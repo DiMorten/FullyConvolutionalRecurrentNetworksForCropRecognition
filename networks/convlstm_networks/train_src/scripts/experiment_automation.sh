@@ -6,7 +6,7 @@ dataset=$3 # could be cv or lem
 if [ "$dataset" == "cv_seq1" ]
 then
 	filename="campo_verde"
-	results_path='../results/convlstm_results/cv/'
+	results_path='../results/convlstm_results/model/cv/'
 	summary_save_path='../results/convlstm_results/summary/cv/'
 	dataset_path="../../../dataset/dataset/cv_data/"
 	sequence_len=7
@@ -14,7 +14,7 @@ then
 elif [ "$dataset" == "cv" ]
 then
 	filename="campo_verde"
-	results_path='../results/convlstm_results/cv/'
+	results_path='../results/convlstm_results/model/cv/'
 	summary_save_path='../results/convlstm_results/summary/cv/'
 	dataset_path="../../../dataset/dataset/cv_data/"
 	sequence_len=14
@@ -22,7 +22,7 @@ then
 
 else
 	filename="lm"
-	results_path='../results/convlstm_results/lm/'
+	results_path='../results/convlstm_results/model/lm/'
 	summary_save_path='../results/convlstm_results/summary/lm/'
 	dataset_path="../../../dataset/dataset/lm_data/"
 	sequence_len=13
@@ -65,7 +65,9 @@ echo "${filename}_${model}_${id}"
 #cd -
 # =============== MOVE PREDICTIONS TO RESULT FOLDER ======
 #results_path='../results/seq2seq_ignorelabel/cv/'
-cp prediction.npy "${results_path}prediction_${model}_${id}.npy"
+cp prediction.npy "${results_path}prediction_${model}_${id}.h5"
+#cp prediction.npy "${results_path}prediction_${model}_${id}.npy"
+
 cp model_summary.txt "${summary_save_path}summary_${model}_${id}.txt" 
 cd scripts
 

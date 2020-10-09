@@ -147,13 +147,13 @@ def metrics_get(label_test,predictions,only_basics=False,debug=1, detailed_t=Non
 # =========seq2seq 
 def experiment_analyze(small_classes_ignore,dataset='cv',
 		prediction_filename='prediction_DenseNetTimeDistributed_blockgoer.npy',
-		mode='each_date',debug=1):
+		prediction_type='npy', mode='each_date',debug=1):
 	#path='/home/lvc/Jorg/igarss/convrnn_remote_sensing/results/seq2seq_ignorelabel/'+dataset+'/'
 	path="../../results/convlstm_results/"+dataset+'/'
 	prediction_path=path+prediction_filename
 	path_test='../../../../dataset/dataset/'+dataset+'_data/patches_bckndfixed/test/'
 	
-	prediction_type = 'model'
+	#prediction_type = 'model'
 	if prediction_type=='npy':
 		predictionsLoader = PredictionsLoaderNPY()
 		predictions, label_test = predictionsLoader.loadPredictions(prediction_path,path+'labels.npy')
@@ -234,17 +234,26 @@ def experiment_groups_analyze(dataset,experiment_group,
 	small_classes_ignore,mode='each_date',exp_id=1):
 	save=True
 	if save==True:	
-
 		experiment_metrics=[]
 		for group in experiment_group:
 			group_metrics=[]
 			for experiment in group:
-				print("Starting experiment:",experiment)
+				print("======determining prediction type")
+
+				if experiment[-3:]=='npy':
+					prediction_type='npy'
+				elif experiment[-2:]=='h5':
+					prediction_type='model'
+
+				print("Starting experiment: {}. Prediction type: {}".format(experiment,prediction_type))
+
+
 				group_metrics.append(experiment_analyze(
 					dataset=dataset,
 					prediction_filename=experiment,
 					mode=mode,debug=0,
-					small_classes_ignore=small_classes_ignore))
+					small_classes_ignore=small_classes_ignore,
+					prediction_type=prediction_type))
 			experiment_metrics.append(group_metrics)
 
 	#	for model_id in range(len(experiment_metrics[0])):
