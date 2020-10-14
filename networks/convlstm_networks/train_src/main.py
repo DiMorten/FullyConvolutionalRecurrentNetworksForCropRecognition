@@ -97,7 +97,8 @@ deb.prints(args.patch_step_test)
 
 
 #========= overwrite for direct execution of this py file
-direct_execution=True
+args.stop_epoch=-1
+direct_execution=False
 if direct_execution==True:
 	dataset='cv'
 	#dataset='lm'
@@ -125,7 +126,7 @@ if direct_execution==True:
 		elif sensor_source=='OpticalWithClouds':
 			args.channel_n=3
 			args.t_len=13
-	args.stop_epoch=-1
+
 	args.model_type='BUnet4ConvLSTM'
 	#args.model_type='ConvLSTM_seq2seq'
 	#args.model_type='ConvLSTM_seq2seq_bi'
@@ -2529,9 +2530,9 @@ if __name__ == '__main__':
 
 
 	#adam = Adam(lr=0.0001, beta_1=0.9)
-	#adam = Adam(lr=0.001, beta_1=0.9)
+	adam = Adam(lr=0.001, beta_1=0.9)
 	
-	adam = Adagrad(0.01)
+	#adam = Adagrad(0.01)
 	#model = ModelLoadEachBatch(epochs=args.epochs, patch_len=args.patch_len,
 	model = NetModel(epochs=args.epochs, patch_len=args.patch_len,
 					 patch_step_train=args.patch_step_train, eval_mode=args.eval_mode,

@@ -1,5 +1,5 @@
 KERAS_BACKEND=tensorflow
-id='focal_test'
+id='adam_focal'
 
 dataset='cv'
 ##dataset='lm'
