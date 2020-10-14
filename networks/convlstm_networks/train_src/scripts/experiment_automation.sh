@@ -65,7 +65,7 @@ echo "${filename}_${model}_${id}"
 #cd -
 # =============== MOVE PREDICTIONS TO RESULT FOLDER ======
 #results_path='../results/seq2seq_ignorelabel/cv/'
-cp prediction.npy "${results_path}prediction_${model}_${id}.h5"
+cp model_best.h5 "${results_path}model_best_${model}_${id}.h5"
 #cp prediction.npy "${results_path}prediction_${model}_${id}.npy"
 
 cp model_summary.txt "${summary_save_path}summary_${model}_${id}.txt" 

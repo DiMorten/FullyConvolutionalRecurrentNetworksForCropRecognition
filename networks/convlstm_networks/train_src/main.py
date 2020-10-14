@@ -2666,8 +2666,8 @@ if __name__ == '__main__':
 	#metrics=['accuracy',fmeasure,categorical_accuracy]
 
 
-	#loss=weighted_categorical_crossentropy_ignoring_last_label(model.loss_weights)
-	loss=categorical_focal_ignoring_last_label(alpha=0.25,gamma=2)
+	loss=weighted_categorical_crossentropy_ignoring_last_label(model.loss_weights)
+	#loss=categorical_focal_ignoring_last_label(alpha=0.25,gamma=2)
 
 	model.graph.compile(loss=loss,
 				  optimizer=adam, metrics=metrics)
