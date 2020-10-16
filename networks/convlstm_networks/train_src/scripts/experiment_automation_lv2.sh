@@ -1,8 +1,8 @@
 KERAS_BACKEND=tensorflow
 id='adam_focal'
 
-dataset='cv'
-##dataset='lm'
+#dataset='cv'
+dataset='lm'
 ##dataSource='OpticalWithClouds'
 dataSource='SAR'
 

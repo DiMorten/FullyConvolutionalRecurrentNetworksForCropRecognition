@@ -5,7 +5,7 @@ import deb
 import glob
 
 import re
-
+import pdb
 def natural_sort(l): 
     convert = lambda text: int(text) if text.isdigit() else text.lower() 
     alphanum_key = lambda key: [convert(c) for c in re.split('([0-9]+)', key)] 
@@ -24,7 +24,8 @@ class PatchesStorageAllSamples(PatchesStorage):
 		self.path['train_bckndfixed']=self.path_patches+'train/'
 		self.path['val_bckndfixed']=self.path_patches+'val/'
 		self.path['test_bckndfixed']=self.path_patches+'test/'
-
+		print("Path, ",self.path)
+		#pdb.set_trace()
 	def store(self,data_patches):
 		self.storeSplit(data_patches['train'],'train_bckndfixed')
 		self.storeSplit(data_patches['test'],'test_bckndfixed')
@@ -32,12 +33,12 @@ class PatchesStorageAllSamples(PatchesStorage):
 
 	def storeSplit(self, patches, split='train_bckndfixed'):
 		pathlib.Path(self.path[split]).mkdir(parents=True, exist_ok=True) 
-		
+		print("Storing in ",self.path[split])
 		np.save(self.path[split]+'patches_in.npy', patches['in']) #to-do: add polymorphism for other types of input 
 		
 		#pathlib.Path(self.path[split]['label']).mkdir(parents=True, exist_ok=True) 
 		np.save(self.path[split]+'patches_label.npy', patches['label']) #to-do: add polymorphism for other types of input 
-
+		#pdb.set_trace()
 	def load(self):
 		data_patches={}
 		data_patches['val']=self.loadSplit('val_bckndfixed')
@@ -72,11 +73,11 @@ class PatchesStorageEachSample(PatchesStorage):
 	def storeSplit(self, patches, split='train'):
 		pathlib.Path(self.path_im[split]).mkdir(parents=True, exist_ok=True) 
 		pathlib.Path(self.path_label[split]).mkdir(parents=True, exist_ok=True) 
-		
+
 		for idx in range(patches['in'].shape[0]):
 			np.save(self.path_im[split]+'patches_in'+str(idx).zfill(5)+'.npy', patches['in'][idx]) #to-do: add polymorphism for other types of input 
 			np.save(self.path_label[split]+'patches_label'+str(idx).zfill(5)+'.npy', patches['label'][idx]) #to-do: add polymorphism for other types of input 
-
+		pdb.set_trace()
 		#pathlib.Path(self.path[split]['label']).mkdir(parents=True, exist_ok=True) 
 		
 	def load(self):

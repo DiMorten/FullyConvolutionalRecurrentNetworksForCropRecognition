@@ -2487,7 +2487,7 @@ class ModelLoadEachBatch(NetModel):
 flag = {"data_create": 2, "label_one_hot": True}
 if __name__ == '__main__':
 
-	premade_split_patches_load=True
+	premade_split_patches_load=False
 	
 
 	deb.prints(premade_split_patches_load)
@@ -2637,23 +2637,26 @@ if __name__ == '__main__':
 		model.loss_weights=np.load(data.path_patches_bckndfixed+'loss_weights.npy')
 
 
-		store_patches_each_sample=False
-		if store_patches_each_sample==True:
-			patchesStorageEachSample = PatchesStorageEachSample(data.path['v'])
+	store_patches_each_sample=False
+	if store_patches_each_sample==True:
+		patchesStorageEachSample = PatchesStorageEachSample(data.path['v'])
+	
+		print("===== STORING THE LOADED PATCHES AS EACH SAMPLE IN SEPARATE FILE ======")
 		
-			print("===== STORING THE LOADED PATCHES AS EACH SAMPLE IN SEPARATE FILE ======")
-			
-			patchesStorageEachSample.store(data.patches)
+		patchesStorageEachSample.store(data.patches)
 
-			print("======== ASSERT THE patchesStorageEachSample.load() IS THE SAME AS data.patches")
+		print("======== ASSERT THE patchesStorageEachSample.load() IS THE SAME AS data.patches")
+	
+		assert data.patches['train']['in'].all()==patchesStorageEachSample.load()['train']['in'].all()
+		assert data.patches['test']['in'].all()==patchesStorageEachSample.load()['test']['in'].all()
+		assert data.patches['val']['in'].all()==patchesStorageEachSample.load()['val']['in'].all()
+	elif store_patches_each_sample==False:
+		patchesStorage = PatchesStorageAllSamples(data.path['v'])
+	
+		print("===== STORING THE LOADED PATCHES AS ALL SAMPLES IN A SINGLE FILE ======")
 		
-			assert data.patches['train']['in'].all()==patchesStorageEachSample.load()['train']['in'].all()
-			assert data.patches['test']['in'].all()==patchesStorageEachSample.load()['test']['in'].all()
-			assert data.patches['val']['in'].all()==patchesStorageEachSample.load()['val']['in'].all()
+		patchesStorage.store(data.patches)
 
-			###data.partition=patchesStorageEachSample.loadPartition()
-		#deb.prints(data.partition)
-		#pdb.set_trace()
 
 	deb.prints(data.patches['train']['label'].shape)
 
@@ -2667,11 +2670,12 @@ if __name__ == '__main__':
 	#metrics=['accuracy',fmeasure,categorical_accuracy]
 
 
-	loss=weighted_categorical_crossentropy_ignoring_last_label(model.loss_weights)
-	#loss=categorical_focal_ignoring_last_label(alpha=0.25,gamma=2)
+	#loss=weighted_categorical_crossentropy_ignoring_last_label(model.loss_weights)
+	loss=categorical_focal_ignoring_last_label(alpha=0.25,gamma=2)
 
 	model.graph.compile(loss=loss,
 				  optimizer=adam, metrics=metrics)
+
 	model_load=False
 	if model_load:
 		model=load_model('/home/lvc/Documents/Jorg/sbsr/fcn_model/results/seq2_true_norm/models/model_1000.h5')

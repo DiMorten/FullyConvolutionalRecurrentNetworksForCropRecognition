@@ -549,6 +549,7 @@ if dataset=='cv':
 			#'prediction_BUnet4ConvLSTM_repeating1.npy',
 			'model_best_BUnet4ConvLSTM_focal_test.h5',
 			'model_best_focal_loss_bunetconvlstm_cv.h5',
+			'model_best_BUnet4ConvLSTM_adam_crossentropy.h5',
 			'model_best_BUnet4ConvLSTM_adam_focal.h5']]
 		
 elif dataset=='lm':
