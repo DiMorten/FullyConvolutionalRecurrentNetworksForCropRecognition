@@ -27,7 +27,7 @@ from densnet_timedistributed import DenseNetFCNTimeDistributed
 
 from metrics import fmeasure,categorical_accuracy
 import deb
-from keras_weighted_categorical_crossentropy import weighted_categorical_crossentropy, sparse_accuracy_ignoring_last_label, weighted_categorical_crossentropy_ignoring_last_label, categorical_focal_ignoring_last_label
+from keras_weighted_categorical_crossentropy import weighted_categorical_crossentropy, sparse_accuracy_ignoring_last_label, weighted_categorical_crossentropy_ignoring_last_label, categorical_focal_ignoring_last_label, weighted_categorical_focal_ignoring_last_label
 from keras.models import load_model
 from keras.layers import ConvLSTM2D, ConvGRU2D, UpSampling2D, multiply
 from keras.utils.vis_utils import plot_model
@@ -2098,7 +2098,40 @@ class NetModel(NetObject):
 										padding='same')(out)
 			self.graph = Model(in_im, out)
 			print(self.graph.summary())
+		if self.model_type=='BUnet4ConvLSTM_SkipLSTM':
+			#fs=32
+			fs=16
 
+			p1=dilated_layer(in_im,fs)
+			p1=dilated_layer(p1,fs)
+			x_p1 = Bidirectional(ConvLSTM2D(64,3,return_sequences=True,
+					padding="same"),merge_mode='concat')(p1)
+			e1 = TimeDistributed(AveragePooling2D((2, 2), strides=(2, 2)))(p1)
+			p2=dilated_layer(e1,fs*2)
+			x_p2 = Bidirectional(ConvLSTM2D(64,3,return_sequences=True,
+					padding="same"),merge_mode='concat')(p2)
+			e2 = TimeDistributed(AveragePooling2D((2, 2), strides=(2, 2)))(p2)
+			p3=dilated_layer(e2,fs*4)
+			x_p3 = Bidirectional(ConvLSTM2D(64,3,return_sequences=True,
+					padding="same"),merge_mode='concat')(p3)
+			e3 = TimeDistributed(AveragePooling2D((2, 2), strides=(2, 2)))(p3)
+
+			x = Bidirectional(ConvLSTM2D(64,3,return_sequences=True,
+					padding="same"),merge_mode='concat')(e3)
+
+			d3 = transpose_layer(x,fs*4)
+			d3 = keras.layers.concatenate([d3, x_p3], axis=4)
+			d3 = dilated_layer(d3,fs*4)
+			d2 = transpose_layer(d3,fs*2)
+			d2 = keras.layers.concatenate([d2, x_p2], axis=4)
+			d2 = dilated_layer(d2,fs*2)
+			d1 = transpose_layer(d2,fs)
+			d1 = keras.layers.concatenate([d1, x_p1], axis=4)
+			out = dilated_layer(d1,fs)
+			out = TimeDistributed(Conv2D(self.class_n, (1, 1), activation=None,
+										padding='same'))(out)
+			self.graph = Model(in_im, out)
+			print(self.graph.summary())
 
 		#self.graph = Model(in_im, out)
 		print(self.graph.summary(line_length=125))
@@ -2125,9 +2158,13 @@ class NetModel(NetObject):
 			else:
 				self.loss_weights[clss]=0
 		deb.prints(self.loss_weights)
-
-		self.loss_weights[1:]=1
+		self.loss_weights_ones=self.loss_weights.copy() # all weights are 1
+		self.loss_weights_ones[1:]=1
+		
+		# no background weight
 		self.loss_weights=self.loss_weights[1:]
+		self.loss_weights_ones=self.loss_weights_ones[1:]
+
 		deb.prints(self.loss_weights.shape)
 		
 	def test(self,data):
@@ -2487,7 +2524,7 @@ class ModelLoadEachBatch(NetModel):
 flag = {"data_create": 2, "label_one_hot": True}
 if __name__ == '__main__':
 
-	premade_split_patches_load=False
+	premade_split_patches_load=True
 	
 
 	deb.prints(premade_split_patches_load)
@@ -2670,8 +2707,9 @@ if __name__ == '__main__':
 	#metrics=['accuracy',fmeasure,categorical_accuracy]
 
 
-	#loss=weighted_categorical_crossentropy_ignoring_last_label(model.loss_weights)
-	loss=categorical_focal_ignoring_last_label(alpha=0.25,gamma=2)
+	#loss=weighted_categorical_crossentropy_ignoring_last_label(model.loss_weights_ones)
+	#loss=categorical_focal_ignoring_last_label(alpha=0.25,gamma=2)
+	loss=weighted_categorical_focal_ignoring_last_label(model.loss_weights,alpha=0.25,gamma=2)
 
 	model.graph.compile(loss=loss,
 				  optimizer=adam, metrics=metrics)

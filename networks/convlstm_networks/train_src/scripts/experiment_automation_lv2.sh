@@ -1,8 +1,8 @@
 KERAS_BACKEND=tensorflow
-id='adam_focal'
+id='adagrad_crossentropy'
 
 #dataset='cv'
-dataset='lm'
+dataset='cv'
 ##dataSource='OpticalWithClouds'
 dataSource='SAR'
 

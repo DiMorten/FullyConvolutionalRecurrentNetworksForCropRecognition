@@ -392,7 +392,7 @@ def experiments_plot(metrics,experiment_list,dataset,
 			if small_classes_ignore==True:
 				ax.set_ylim(40,87)
 			else:
-				ax.set_ylim(7,75)	
+				ax.set_ylim(7,85)	
 			ax3.set_ylim(30,94)
 
 			ax.set_xticks(X+width/2)
@@ -438,8 +438,8 @@ def experiments_plot(metrics,experiment_list,dataset,
 	elif experiment_id==2:
 		legends=('BConvLSTM','BDenseConvLSTM','BUnetConvLSTM','BUnet2ConvLSTM','BAtrousGAPConvLSTM','BAtrousConvLSTM','BUnetAtrousConvLSTM','BFCNAtrousConvLSTM')
 	elif experiment_id==3:
-		legends=('UConvLSTM','BConvLSTM','BUnetConvLSTM','BAtrousConvLSTM')
-		legends=('UConvLSTM','BConvLSTM','BDenseConvLSTM','BUnetConvLSTM','BAtrousConvLSTM','BAtrousGAPConvLSTM')
+		legends=('Adagrad+crossentropy','Adagrad+FL','Adam+crossentropy','Adam+FL')
+		#legends=('UConvLSTM','BConvLSTM','BDenseConvLSTM','BUnetConvLSTM','BAtrousConvLSTM','BAtrousGAPConvLSTM')
 	elif experiment_id==4:
 		legends=('UConvLSTM','BConvLSTM','BDenseConvLSTM','BUnetConvLSTM','BAtrousConvLSTM')
 	elif experiment_id==6:
@@ -501,7 +501,7 @@ def experiments_plot(metrics,experiment_list,dataset,
 
 #dataset='lm_optical_clouds'
 #dataset='lm'
-dataset='cv'
+dataset='lm'
 load_metrics=False
 small_classes_ignore=False
 #mode='global'
@@ -548,7 +548,7 @@ if dataset=='cv':
 		experiment_groups=[[#'prediction_deeplabv3plus_v3plus2.npy',
 			#'prediction_BUnet4ConvLSTM_repeating1.npy',
 			'model_best_BUnet4ConvLSTM_focal_test.h5',
-			'model_best_focal_loss_bunetconvlstm_cv.h5',
+			'model_best_focal_loss_bunetconvlstm_cv.h5', #focal loss, adagrad
 			'model_best_BUnet4ConvLSTM_adam_crossentropy.h5',
 			'model_best_BUnet4ConvLSTM_adam_focal.h5']]
 		
@@ -568,7 +568,7 @@ elif dataset=='lm':
 		'prediction_ConvLSTM_seq2seq_bi_redoingz2.npy',
 		'prediction_DenseNetTimeDistributed_128x2_redoingz2.npy'],]
 	#exp_id=8 # choose 4 for thesis and journal paper
-	exp_id=4 # choose 4 for thesis and journal paper
+	exp_id=9 # choose 4 for thesis and journal paper
 	
 	if exp_id==2:
 		experiment_groups=[['prediction_ConvLSTM_seq2seq_bi_batch16_full.npy',
@@ -672,6 +672,15 @@ elif dataset=='lm':
 		experiment_groups=[[
 			'model_best_BConvLSTM_2.h5'
 		]]
+		experiment_groups=[[ # to demonstrate that h5 is a bit better (not so much) than npy
+			'model_best_compare.h5',
+			'prediction_compare.npy'
+		]]
+		experiment_groups=[[ # to demonstrate that h5 is a bit better (not so much) than npy
+			'model_best_BUnet4ConvLSTM_adam_focal.h5',
+			#'prediction_compare.npy'
+		]]
+		
 elif dataset=='lm_optical':
 	exp_id=1
 	experiment_groups=[[
