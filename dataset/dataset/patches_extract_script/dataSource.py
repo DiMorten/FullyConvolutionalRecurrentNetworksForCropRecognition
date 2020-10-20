@@ -29,7 +29,7 @@ from sklearn.preprocessing import StandardScaler
 from skimage.util import view_as_windows
 #import natsort
 from abc import ABC, abstractmethod
-
+import time, datetime
 class DataSource(object):
 	def __init__(self, band_n, foldernameInput, label_folder,name):
 		self.band_n = band_n
@@ -174,6 +174,17 @@ class Dataset(object):
 	@abstractmethod
 	def addDataSource(self,dataSource):
 		pass
+	def getBandN(self):
+		return self.dataSource.band_n
+	def getTimeDelta(self):
+		time_delta=[]
+		for im in self.im_list:
+			date=im[:8]
+			print(date)
+			time_delta.append(time.mktime(datetime.datetime.strptime(date, 
+                                             "%Y%m%d").timetuple()))
+		print(time_delta)
+		return np.asarray(time_delta)
 class CampoVerde(Dataset):
 	def __init__(self):
 		path="../cv_data/"

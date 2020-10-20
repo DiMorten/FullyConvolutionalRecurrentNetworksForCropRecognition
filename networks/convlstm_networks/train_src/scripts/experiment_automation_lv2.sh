@@ -10,7 +10,7 @@ dataSource='SAR'
 . patches_extract.sh $dataset $dataSource
 # ===== USE MODEL
 #. experiment_automation.sh $id 'BUnet4ConvLSTM_SkipLSTM' $dataset
-. experiment_automation.sh $id 'Unet3D' $dataset
+#. experiment_automation.sh $id 'Unet3D' $dataset
 #. experiment_automation.sh $id 'BUnet4ConvLSTM_64' $dataset  # Unet5 uses 1 conv. in
 
 
