@@ -176,6 +176,9 @@ class Dataset(object):
 		pass
 	def getBandN(self):
 		return self.dataSource.band_n
+	def getClassN(self):
+		return self.class_n
+
 	def getTimeDelta(self):
 		time_delta=[]
 		for im in self.im_list:

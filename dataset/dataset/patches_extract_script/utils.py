@@ -276,7 +276,9 @@ class DataForNet(object):
 		self.full_label_train,self.full_label_test=self.label_seq_mask(patch["full_label_ims"],patch["train_mask"]) 
 	 	
 		# Optionally get im stats
-		self.datasetStats.calcAverageTimeseries(patch["full_ims"],patch["train_mask"])
+		#self.datasetStats.calcAverageTimeseries(patch["full_ims"],patch["train_mask"])
+		self.datasetStats.calcAverageTimeseriesPerClass(patch["full_ims"],patch["train_mask"],patch["full_label_ims"])
+
 		pdb.set_trace()
 		#self.label_id=self.conf["seq"]["id_first"]+self.conf['t_len']-2 # Less 1 for python idx, less 1 for id_first starts at 1 
 	 
