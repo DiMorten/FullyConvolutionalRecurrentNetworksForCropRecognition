@@ -30,7 +30,7 @@ import pdb
 # Local
 import deb
 from dataSource import DataSource, SARSource, OpticalSource, Dataset, LEM, CampoVerde, OpticalSourceWithClouds
-
+from dataset_stats import DatasetStats
 def mask_train_test_switch_from_path(path):
 	mask=cv2.imread(path)
 	out=mask_train_test_switch(mask)
@@ -53,6 +53,8 @@ class DataForNet(object):
 		self.dataSource = dataSource
 		deb.prints(self.dataSource,color=deb.bcolors.OKBLUE)
 		self.dataset.addDataSource(self.dataSource)
+
+		self.datasetStats=DatasetStats(self.dataset)
 
 		deb.prints(patches_save)
 		self.patches_save=patches_save
@@ -272,7 +274,10 @@ class DataForNet(object):
 		self.full_ims_train,self.full_ims_test=self.im_seq_mask(patch["full_ims"],patch["train_mask"])
 
 		self.full_label_train,self.full_label_test=self.label_seq_mask(patch["full_label_ims"],patch["train_mask"]) 
-	 
+	 	
+		# Optionally get im stats
+		self.datasetStats.calcAverageTimeseries(patch["full_ims"],patch["train_mask"])
+		pdb.set_trace()
 		#self.label_id=self.conf["seq"]["id_first"]+self.conf['t_len']-2 # Less 1 for python idx, less 1 for id_first starts at 1 
 	 
 		unique,count=np.unique(self.full_label_train,return_counts=True) 

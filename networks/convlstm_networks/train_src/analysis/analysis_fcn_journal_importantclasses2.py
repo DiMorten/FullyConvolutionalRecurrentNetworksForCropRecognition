@@ -501,7 +501,7 @@ def experiments_plot(metrics,experiment_list,dataset,
 
 #dataset='lm_optical_clouds'
 #dataset='lm'
-dataset='lm'
+dataset='cv'
 load_metrics=False
 small_classes_ignore=False
 #mode='global'
@@ -525,7 +525,7 @@ if dataset=='cv':
 		['prediction_ConvLSTM_seq2seq_redoingz2.npy',
 		'prediction_ConvLSTM_seq2seq_bi_redoing3.npy',
 		'prediction_DenseNetTimeDistributed_128x2_redoing3.npy']]
-	exp_id=3 # 4 for thesis and journal
+	exp_id=4 
 
 	if exp_id==1:
 		experiment_groups=[[#'prediction_deeplabv3plus_v3plus2.npy',
@@ -550,7 +550,15 @@ if dataset=='cv':
 			'model_best_BUnet4ConvLSTM_focal_test.h5',
 			'model_best_focal_loss_bunetconvlstm_cv.h5', #focal loss, adagrad
 			'model_best_BUnet4ConvLSTM_adam_crossentropy.h5',
-			'model_best_BUnet4ConvLSTM_adam_focal.h5']]
+			'model_best_BUnet4ConvLSTM_adam_focal.h5',
+			'model_best_BUnet4ConvLSTM_adam_weighted_focal.h5']]
+	elif exp_id==4:
+		experiment_groups=[['model_best_BUnet4ConvLSTM_adam_focal.h5',
+			'model_best_BUnet4ConvLSTM_64_adam_focal.h5',
+			'model_best_BUnet4ConvLSTM_SkipLSTM_adam_focal.h5',
+			'model_best_Unet3D_16_adam_focal.h5',
+			'model_best_Unet3D_adam_focal3.h5',
+			'model_best_Unet3D_adam_focal4.h5']]
 		
 elif dataset=='lm':
 

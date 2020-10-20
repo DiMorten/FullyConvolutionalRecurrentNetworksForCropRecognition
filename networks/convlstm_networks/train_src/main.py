@@ -127,14 +127,14 @@ if direct_execution==True:
 			args.channel_n=3
 			args.t_len=13
 
-	args.model_type='BUnet4ConvLSTM'
+	##args.model_type='BUnet4ConvLSTM'
 	#args.model_type='ConvLSTM_seq2seq'
 	#args.model_type='ConvLSTM_seq2seq_bi'
 	#args.model_type='DenseNetTimeDistributed_128x2'
 	#args.model_type='BAtrousGAPConvLSTM'
 	#args.model_type='Unet3D'
 	#args.model_type='BUnet6ConvLSTM'
-
+	args.model_type='BUnet4ConvLSTM_SkipLSTM'
 
 def model_summary_print(s):
 	with open('model_summary.txt','w+') as f:
@@ -273,8 +273,7 @@ class Dataset(NetObject):
 			for t_step in range(self.patches['test']['label'].shape[1]):
 				deb.prints(t_step)
 				deb.prints(np.unique(self.patches['test']['label'].argmax(axis=-1)[:,t_step],return_counts=True))
-			pdb.set_trace()
-		
+			
 		self.patches['train']['n']=self.patches['train']['in'].shape[0]
 		self.patches['train']['idx']=range(self.patches['train']['n'])
 		np.save('labels_beginning.npy',self.patches['test']['label'])
@@ -2076,7 +2075,8 @@ class NetModel(NetObject):
 
 		if self.model_type=='Unet3D':
 			#fs=32
-			fs=16
+			#fs=16
+			fs=64
 
 			p1=dilated_layer_3D(in_im,fs)
 			e1 = AveragePooling3D((1, 2, 2), strides=(1, 2, 2))(p1)
@@ -2132,6 +2132,36 @@ class NetModel(NetObject):
 										padding='same'))(out)
 			self.graph = Model(in_im, out)
 			print(self.graph.summary())
+		if self.model_type=='BUnet4ConvLSTM_64':
+
+
+			#fs=32
+			fs=16
+
+			p1=dilated_layer(in_im,fs)			
+			p1=dilated_layer(p1,fs)
+			e1 = TimeDistributed(AveragePooling2D((2, 2), strides=(2, 2)))(p1)
+			p2=dilated_layer(e1,fs*2)
+			e2 = TimeDistributed(AveragePooling2D((2, 2), strides=(2, 2)))(p2)
+			p3=dilated_layer(e2,fs*4)
+			e3 = TimeDistributed(AveragePooling2D((2, 2), strides=(2, 2)))(p3)
+
+			x = Bidirectional(ConvLSTM2D(64,3,return_sequences=True,
+					padding="same"),merge_mode='concat')(e3)
+
+			d3 = transpose_layer(x,fs*4)
+			d3 = keras.layers.concatenate([d3, p3], axis=4)
+			d3=dilated_layer(d3,fs*4)
+			d2 = transpose_layer(d3,fs*2)
+			d2 = keras.layers.concatenate([d2, p2], axis=4)
+			d2=dilated_layer(d2,fs*2)
+			d1 = transpose_layer(d2,fs)
+			d1 = keras.layers.concatenate([d1, p1], axis=4)
+			out=dilated_layer(d1,fs)
+			out = TimeDistributed(Conv2D(self.class_n, (1, 1), activation=None,
+										padding='same'))(out)
+			self.graph = Model(in_im, out)
+			print(self.graph.summary())
 
 		#self.graph = Model(in_im, out)
 		print(self.graph.summary(line_length=125))
@@ -2166,6 +2196,8 @@ class NetModel(NetObject):
 		self.loss_weights_ones=self.loss_weights_ones[1:]
 
 		deb.prints(self.loss_weights.shape)
+		deb.prints(self.loss_weights)
+		#pdb.set_trace()
 		
 	def test(self,data):
 		data.patches['train']['batch_n'] = data.patches['train']['in'].shape[0]//self.batch['train']['size']
@@ -2524,7 +2556,7 @@ class ModelLoadEachBatch(NetModel):
 flag = {"data_create": 2, "label_one_hot": True}
 if __name__ == '__main__':
 
-	premade_split_patches_load=True
+	premade_split_patches_load=False
 	
 
 	deb.prints(premade_split_patches_load)
@@ -2673,9 +2705,9 @@ if __name__ == '__main__':
 		deb.prints(data.patches['val']['label'].shape)
 		model.loss_weights=np.load(data.path_patches_bckndfixed+'loss_weights.npy')
 
-
+	store_patches=True
 	store_patches_each_sample=False
-	if store_patches_each_sample==True:
+	if store_patches==True and store_patches_each_sample==True:
 		patchesStorageEachSample = PatchesStorageEachSample(data.path['v'])
 	
 		print("===== STORING THE LOADED PATCHES AS EACH SAMPLE IN SEPARATE FILE ======")
@@ -2687,7 +2719,7 @@ if __name__ == '__main__':
 		assert data.patches['train']['in'].all()==patchesStorageEachSample.load()['train']['in'].all()
 		assert data.patches['test']['in'].all()==patchesStorageEachSample.load()['test']['in'].all()
 		assert data.patches['val']['in'].all()==patchesStorageEachSample.load()['val']['in'].all()
-	elif store_patches_each_sample==False:
+	elif store_patches==True and store_patches_each_sample==False:
 		patchesStorage = PatchesStorageAllSamples(data.path['v'])
 	
 		print("===== STORING THE LOADED PATCHES AS ALL SAMPLES IN A SINGLE FILE ======")
@@ -2708,8 +2740,8 @@ if __name__ == '__main__':
 
 
 	#loss=weighted_categorical_crossentropy_ignoring_last_label(model.loss_weights_ones)
-	#loss=categorical_focal_ignoring_last_label(alpha=0.25,gamma=2)
-	loss=weighted_categorical_focal_ignoring_last_label(model.loss_weights,alpha=0.25,gamma=2)
+	loss=categorical_focal_ignoring_last_label(alpha=0.25,gamma=2)
+	#loss=weighted_categorical_focal_ignoring_last_label(model.loss_weights,alpha=0.25,gamma=2)
 
 	model.graph.compile(loss=loss,
 				  optimizer=adam, metrics=metrics)
