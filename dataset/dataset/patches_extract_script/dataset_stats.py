@@ -37,11 +37,11 @@ class DatasetStats():
             averageTimeseries=[]
             plt.figure(channel)
             fig, ax = plt.subplots()
-            ax.set_prop_cycle(cycler('color', ['c', 'm', 'y', 'k','c', 'm', 'y', 'k','c', 'm', 'y', 'k']))
+            ax.set_prop_cycle(cycler('color', ['c', 'm', 'y', 'k','b', 'g', 'r']))
 
-#            for clss in range(self.dataset.getClassN()):
 #            for clss,clss_name in zip([1,2,3,9],['soybean','maize','cotton','soil']):
-            for clss,clss_name in zip([1,2,3,13],['soybean','maize','cotton','soil']):
+            for clss,clss_name in zip([1,2,3,7,13],['soybean','maize','cotton','millet','soil']):
+#            for clss,clss_name in zip(range(self.dataset.getClassN()),self.dataset.getClassList()):
                 averageTimeseries=[]
                 for t_step in range(0,self.dataset.t_len):
                     # check available classes
@@ -52,7 +52,7 @@ class DatasetStats():
                     if not (clss in label_t_unique):
                         averageTimeseries.append(np.nan)
                         continue
-                    print("Label t shape",label_t.shape)
+                    #print("Label t shape",label_t.shape)
                     #mask_t=mask[t_step]
                     
                     #print("im shape: {}, mask shape: {}".format(im.shape,mask.shape))

@@ -166,11 +166,12 @@ class OpticalSourceWithClouds(OpticalSource):
 		self.name='OpticalSourceWithClouds'
 
 class Dataset(object):
-	def __init__(self,path,im_h,im_w,class_n):
+	def __init__(self,path,im_h,im_w,class_n,class_list):
 		self.path=path
 		self.class_n=class_n
 		self.im_h=im_h
 		self.im_w=im_w
+		self.class_list=class_list
 	@abstractmethod
 	def addDataSource(self,dataSource):
 		pass
@@ -178,7 +179,8 @@ class Dataset(object):
 		return self.dataSource.band_n
 	def getClassN(self):
 		return self.class_n
-
+	def getClassList(self):
+		return self.class_list
 	def getTimeDelta(self):
 		time_delta=[]
 		for im in self.im_list:
@@ -194,7 +196,8 @@ class CampoVerde(Dataset):
 		class_n=13
 		im_h=8492
 		im_w=7995
-		super().__init__(path,im_h,im_w,class_n)
+		class_list = ['Background','Soybean','Maize','Cotton','Sorghum','Beans','NCC','Pasture','Eucaplyptus','Soil','Turfgrass','Cerrado']
+		super().__init__(path,im_h,im_w,class_n,class_list)
 
 	def addDataSource(self,dataSource):
 		self.dataSource = dataSource
@@ -211,7 +214,8 @@ class LEM(Dataset):
 		class_n=15
 		im_w=8658
 		im_h=8484
-		super().__init__(path,im_h,im_w,class_n)
+		class_list = ['Background','Soybean','Maize','Cotton','Coffee','Beans','Sorghum','Millet','Eucalyptus','Pasture/Grass','Hay','Cerrado','Conversion Area','Soil','Not Identified']
+		super().__init__(path,im_h,im_w,class_n,class_list)
 
 	def addDataSource(self,dataSource):
 		deb.prints(dataSource.name)
