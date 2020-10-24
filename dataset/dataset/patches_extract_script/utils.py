@@ -29,8 +29,9 @@ from abc import ABC, abstractmethod
 import pdb
 # Local
 import deb
-from dataSource import DataSource, SARSource, OpticalSource, Dataset, LEM, CampoVerde, OpticalSourceWithClouds
+from dataSource import DataSource, SARSource, OpticalSource, Dataset, LEM, CampoVerde, OpticalSourceWithClouds, Humidity
 from dataset_stats import DatasetStats
+import pdb
 def mask_train_test_switch_from_path(path):
 	mask=cv2.imread(path)
 	out=mask_train_test_switch(mask)
@@ -48,9 +49,10 @@ class DataForNet(object):
 		n_apriori=16000, squeeze_classes=False, data_dir='data',id_first=1, \
 		train_test_mask_name="TrainTestMask.tif",test_overlap_full=True,ram_store=True,patches_save=False,
 		patch_test_overlap=0, dataSource=SARSource(), dataset=LEM()):
-
+		self.useHumidity=True
 		self.dataset = dataset
 		self.dataSource = dataSource
+
 		deb.prints(self.dataSource,color=deb.bcolors.OKBLUE)
 		self.dataset.addDataSource(self.dataSource)
 
@@ -61,6 +63,7 @@ class DataForNet(object):
 		self.ram_store=ram_store
 		self.conf={"t_len":self.dataset.t_len, "path": self.dataset.path, "class_n":self.dataset.class_n, 'label':{}, 'seq':{}}
 		self.conf['band_n']=self.dataSource.band_n
+
 		deb.prints(self.conf['path'])
 		os.system("rm -rf ../"+self.conf['path']+"/summaries/*")
 
@@ -183,6 +186,11 @@ class DataForNet(object):
 		self.ram_data={"train":{},"test":{}}
 		if self.ram_store:
 			print("HEEEERE")
+			if self.useHumidity==True:
+				ram_data_patch_shape=(self.conf["patch"]["size"],self.conf["patch"]["size"],self.conf["band_n"]+1)
+			else:
+				ram_data_patch_shape=self.patch_shape
+
 			self.ram_data["train"]["ims"]=np.zeros((self.conf["train"]["n_apriori"],self.conf["t_len"])+self.patch_shape)
 			self.ram_data["test"]["ims"]=np.zeros((self.conf["test"]["n_apriori"],self.conf["t_len"])+self.patch_shape)
 		
@@ -253,7 +261,7 @@ class DataForNet(object):
 
 		#patch["values"]=np.zeros((self.conf["t_len"],)+patch_shape)
 		patch["full_ims"]=np.zeros((self.conf["t_len"],)+self.conf["im_3d_size"]).astype(np.float32)
-		patch["full_label_ims"]=np.zeros((self.conf["t_len"],)+self.conf["im_3d_size"][0:2])
+		patch["full_label_ims"]=np.zeros((self.conf["t_len"],)+self.conf["im_3d_size"][0:2]).astype(np.int8)
 
 		#for t_step in range(0,self.conf["t_len"]):
 		deb.prints(self.dataset.im_list)
@@ -265,21 +273,51 @@ class DataForNet(object):
 		patch["full_ims"] = self.dataSource.clip_undesired_values(patch["full_ims"])
 		
 		print(np.min(patch["full_ims"]),np.max(patch["full_ims"]),np.average(patch["full_ims"]))
-		print("Normalizing...")		
+		print("============= Normalizing...")		
+		pdb.set_trace()
+
 		patch["full_ims"]=self.dataSource.im_seq_normalize3(patch["full_ims"],patch["train_mask"])
 
 		deb.prints(np.min(patch["full_ims"]))
 		deb.prints(np.max(patch["full_ims"]))
 		
+
+		# Optionally get im stats
+		calcAverageTimeSeriesFlag=False
+		if calcAverageTimeSeriesFlag==True:
+			print("============ Beginning calc average timeseries ============")
+			#self.datasetStats.calcAverageTimeseries(patch["full_ims"],patch["train_mask"])
+			self.datasetStats.calcAverageTimeseriesPerClass(patch["full_ims"],patch["train_mask"],patch["full_label_ims"])
+			pdb.set_trace()
+
+
+		print("============ Beginning masking ============")
+		pdb.set_trace()
+
 		self.full_ims_train,self.full_ims_test=self.im_seq_mask(patch["full_ims"],patch["train_mask"])
+		patch["full_ims"]=[]
+		
+		print("============ Beginning humidity ============")
+		pdb.set_trace()
+		
+		if self.useHumidity:
+			humidity = Humidity(self.dataset)
+			humidity_ims = humidity.loadIms()
+			self.full_ims_train=np.concatenate((self.full_ims_train,humidity_ims),axis=-1)
+			deb.prints(self.full_ims_train.shape)
+			pdb.set_trace()
+			self.full_ims_test=np.concatenate((self.full_ims_test,humidity_ims),axis=-1)
+			del humidity_ims
+			pdb.set_trace()
+
+			self.dataSource.addHumidity() #band_n+=1
+
 
 		self.full_label_train,self.full_label_test=self.label_seq_mask(patch["full_label_ims"],patch["train_mask"]) 
-	 	
-		# Optionally get im stats
-		#self.datasetStats.calcAverageTimeseries(patch["full_ims"],patch["train_mask"])
-		self.datasetStats.calcAverageTimeseriesPerClass(patch["full_ims"],patch["train_mask"],patch["full_label_ims"])
 
-		pdb.set_trace()
+
+
+
 		#self.label_id=self.conf["seq"]["id_first"]+self.conf['t_len']-2 # Less 1 for python idx, less 1 for id_first starts at 1 
 	 
 		unique,count=np.unique(self.full_label_train,return_counts=True) 
@@ -306,7 +344,7 @@ class DataForNet(object):
 				self.conf["patch"]["size"],self.conf["patch"]["overlap"],mask=patch["train_mask"],path_train=self.conf["train"], \
 				path_test=self.conf["test"],patches_save=self.patches_save,label_type=label_type,memory_mode=self.conf["memory_mode"])
 		else:			
-			self.conf["train"]["n"],self.conf["test"]["n"]=self.patches_multitemporal_get(patch["full_ims"],patch["full_label_ims"], \
+			self.conf["train"]["n"],self.conf["test"]["n"]=self.patches_multitemporal_get(patch["full_label_ims"], \
 				self.conf["patch"]["size"],self.conf["patch"]["overlap"],mask=patch["train_mask"],path_train=self.conf["train"], \
 				path_test=self.conf["test"],patches_save=self.patches_save,label_type=label_type,memory_mode=self.conf["memory_mode"])
 			deb.prints(self.conf["test"]["overlap_full"])
@@ -314,12 +352,12 @@ class DataForNet(object):
 			#print(self.conf["test"]["overlap_full"]=="True")
 			if self.conf["test"]["overlap_full"]=="True" or self.conf["test"]["overlap_full"]==True:
 				# Make test with overlap full
-				_,self.conf["test"]["n"]=self.patches_multitemporal_get(patch["full_ims"],patch["full_label_ims"], \
+				_,self.conf["test"]["n"]=self.patches_multitemporal_get(patch["full_label_ims"], \
 					self.conf["patch"]["size"],self.conf["patch"]["size"]-1,mask=patch["train_mask"],path_train=self.conf["train"], \
 					path_test=self.conf["test"],patches_save=self.patches_save,label_type=label_type,memory_mode=self.conf["memory_mode"],test_only=True)
 			elif self.conf["test"]["overlap_full"]=="custom":
 				# Make test with overlap full
-				_,self.conf["test"]["n"]=self.patches_multitemporal_get(patch["full_ims"],patch["full_label_ims"], \
+				_,self.conf["test"]["n"]=self.patches_multitemporal_get(patch["full_label_ims"], \
 					self.conf["patch"]["size"],self.conf["patch"]["test_overlap"],mask=patch["train_mask"],path_train=self.conf["train"], \
 					path_test=self.conf["test"],patches_save=self.patches_save,label_type=label_type,memory_mode=self.conf["memory_mode"],test_only=True)
 			
@@ -362,7 +400,7 @@ class DataForNet(object):
 			#patch["full_ims"][t_step] = np.load(self.conf["in_npy_path"]+names[t_step]+".npy")[:,:,:2]
 			patch["full_ims"][t_step] = self.dataSource.im_load(self.conf["in_npy_path"]+im_names[t_step]+".npy")
 			#patch["full_ims"][t_step] = np.load(self.conf["in_npy_path"]+names[t_step]+".npy")
-			deb.prints
+			deb.prints(patch["full_ims"].dtype)
 			deb.prints(np.average(patch["full_ims"][t_step]))
 			deb.prints(np.max(patch["full_ims"][t_step]))
 			deb.prints(np.min(patch["full_ims"][t_step]))
@@ -377,6 +415,8 @@ class DataForNet(object):
 			# Do the masking here. Do we have the train labels?
 		deb.prints(patch["full_ims"].shape,fname)
 		deb.prints(patch["full_label_ims"].shape,fname)
+		deb.prints(patch["full_ims"].dtype,fname)
+		deb.prints(patch["full_label_ims"].dtype,fname)
 		
 		deb.prints(np.unique(patch['full_label_ims'],return_counts=True))
 		return patch
@@ -507,7 +547,7 @@ class DataForNet(object):
 
 
 		return patches,count
-	def patches_multitemporal_get(self,img,label,window,overlap,mask,path_train,path_test,patches_save=True, \
+	def patches_multitemporal_get(self,label,window,overlap,mask,path_train,path_test,patches_save=True, \
 		label_type="one_hot",memory_mode="hdd",test_only=False, ram_store=True):
 
 		fname=sys._getframe().f_code.co_name
@@ -518,7 +558,7 @@ class DataForNet(object):
 		#window= 256
 		#overlap= 200
 		patches_get={}
-		t_steps, h, w, channels = img.shape
+		t_steps, h, w, channels = self.full_ims_train.shape
 		mask_train=np.zeros((h,w))
 		mask_test=np.zeros((h,w))
 		
@@ -554,7 +594,7 @@ class DataForNet(object):
 				xx = gridx[i]
 				yy = gridy[j]
 				#patch_clouds=Bclouds[yy: yy + window, xx: xx + window]
-				patch = img[:,yy: yy + window, xx: xx + window,:]
+				#patch = img[:,yy: yy + window, xx: xx + window,:]
 				label_patch = label[:,yy: yy + window, xx: xx + window]
 				mask_patch = mask[yy: yy + window, xx: xx + window].astype(np.float64)
 				
@@ -809,6 +849,8 @@ class DataForNet(object):
 				im_test[t_step,:,:,band][mask!=2]=-2
 		deb.prints(im_train.shape)
 		return im_train,im_test
+
+
 	def label_seq_mask(self,im,mask): 
 		im=im.astype(np.uint8) 
 		im_train=im.copy() 
@@ -855,14 +897,16 @@ class DataSemantic(DataForNet):
 
 		deb.prints((self.conf["train"]["n_apriori"],self.conf["t_len"])+self.label_shape)
 
-		self.ram_data["train"]["labels"]=np.zeros((self.conf["train"]["n_apriori"],self.conf["t_len"])+self.label_shape)
-		self.ram_data["test"]["labels"]=np.zeros((self.conf["test"]["n_apriori"],self.conf["t_len"])+self.label_shape)
-		self.ram_data["train"]["labels_int"]=np.zeros((self.conf["train"]["n_apriori"],self.conf["t_len"])+self.label_shape)
-		self.ram_data["test"]["labels_int"]=np.zeros((self.conf["test"]["n_apriori"],self.conf["t_len"])+self.label_shape)
+		self.ram_data["train"]["labels"]=np.zeros((self.conf["train"]["n_apriori"],self.conf["t_len"])+self.label_shape).astype(np.int8)
+		self.ram_data["test"]["labels"]=np.zeros((self.conf["test"]["n_apriori"],self.conf["t_len"])+self.label_shape).astype(np.int8)
+		self.ram_data["train"]["labels_int"]=np.zeros((self.conf["train"]["n_apriori"],self.conf["t_len"])+self.label_shape).astype(np.int8)
+		self.ram_data["test"]["labels_int"]=np.zeros((self.conf["test"]["n_apriori"],self.conf["t_len"])+self.label_shape).astype(np.int8)
 
 		self.conf["label_type"]="semantic"
 		deb.prints(self.ram_data["train"]["labels"].shape)
 		deb.prints(self.ram_data["test"]["labels"].shape)
+		deb.prints(self.ram_data["train"]["labels"].dtype)
+		deb.prints(self.ram_data["test"]["labels"].dtype)
 
 	def create(self):
 		os.system("rm -rf "+self.conf["path"]+"train_test")

@@ -30,6 +30,7 @@ from skimage.util import view_as_windows
 #import natsort
 from abc import ABC, abstractmethod
 import time, datetime
+import pdb
 class DataSource(object):
 	def __init__(self, band_n, foldernameInput, label_folder,name):
 		self.band_n = band_n
@@ -42,6 +43,9 @@ class DataSource(object):
 	def im_load(self,filename):
 		pass
 
+	def addHumidity(self):
+		self.band_n=self.band_n+1
+
 class SARSource(DataSource):
 
 	def __init__(self):
@@ -52,17 +56,17 @@ class SARSource(DataSource):
 		super().__init__(band_n, foldernameInput, label_folder,name)
 
 	def im_seq_normalize3(self,im,mask):
-		
+		im_check_flag=False
 		t_steps,h,w,channels=im.shape
 		#im=im.copy()
 		im_flat=np.transpose(im,(1,2,3,0))
 		#im=np.reshape(im,(h,w,t_steps*channels))
 		im_flat=np.reshape(im_flat,(h*w,channels*t_steps))
-		im_check=np.reshape(im_flat,(h,w,channels,t_steps))
-		im_check=np.transpose(im_check,(3,0,1,2))
-
-		deb.prints(im_check.shape)
-		deb.prints(np.all(im_check==im))
+		if im_check_flag==True:
+			im_check=np.reshape(im_flat,(h,w,channels,t_steps))
+			im_check=np.transpose(im_check,(3,0,1,2))
+			deb.prints(im_check.shape)
+			deb.prints(np.all(im_check==im))
 		deb.prints(im.shape)
 		mask_flat=np.reshape(mask,-1)
 		train_flat=im_flat[mask_flat==1,:]
@@ -73,9 +77,12 @@ class SARSource(DataSource):
 		scaler=StandardScaler()
 		scaler.fit(train_flat)
 		train_norm_flat=scaler.transform(train_flat)
+		del train_flat
 
 		im_norm_flat=scaler.transform(im_flat)
+		del im_flat
 		im_norm=np.reshape(im_norm_flat,(h,w,channels,t_steps))
+		del im_norm_flat
 		deb.prints(im_norm.shape)
 		im_norm=np.transpose(im_norm,(3,0,1,2))
 		deb.prints(im_norm.shape)
@@ -215,6 +222,7 @@ class LEM(Dataset):
 		im_w=8658
 		im_h=8484
 		class_list = ['Background','Soybean','Maize','Cotton','Coffee','Beans','Sorghum','Millet','Eucalyptus','Pasture/Grass','Hay','Cerrado','Conversion Area','Soil','Not Identified']
+
 		super().__init__(path,im_h,im_w,class_n,class_list)
 
 	def addDataSource(self,dataSource):
@@ -242,4 +250,22 @@ class LEM(Dataset):
 		self.t_len=len(self.im_list)
 		
 		deb.prints(self.t_len)
+
+class Humidity():
+	def __init__(self,dataset):
+		self.dataset=dataset
+	def loadIms(self):
+		out = np.zeros((self.dataset.t_len,self.dataset.im_h,self.dataset.im_w)).astype(np.int8)
+		for im_id,t in zip(self.dataset.im_list,range(self.dataset.t_len)):
+			filename=self.dataset.path+'humidity/'+im_id[:8]+'_humidity.npy'
+			print("humidity filename",filename)
+			#pdb.set_trace()
+			out[t]=np.load(filename)
+
+
+		return np.expand_dims(out,axis=-1)
+
+
+
+
 
