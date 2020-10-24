@@ -4,7 +4,8 @@ id='adam_focal4'
 #dataset='cv'
 dataset='lm'
 ##dataSource='OpticalWithClouds'
-dataSource='SAR'
+#dataSource='SAR'
+dataSource='SARH'
 
 # ==== EXTRACT PATCHES
 . patches_extract.sh $dataset $dataSource

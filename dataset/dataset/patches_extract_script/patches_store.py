@@ -20,7 +20,7 @@ import utils
 import deb
 from model import (conv_lstm,Conv3DMultitemp,UNet,SMCNN,SMCNNlstm, SMCNN_UNet, SMCNN_conv3d, lstm, conv_lstm_semantic, SMCNN_semantic)
 
-from dataSource import DataSource, SARSource, OpticalSource, Dataset, LEM, CampoVerde, OpticalSourceWithClouds
+from dataSource import DataSource, SARSource, OpticalSource, Dataset, LEM, CampoVerde, OpticalSourceWithClouds,SARHSource
 
 #Input configuration
 parser = argparse.ArgumentParser(description='')
@@ -87,6 +87,8 @@ elif args.dataset_source=='Optical':
     dataSource=OpticalSource()
 elif args.dataset_source=='OpticalWithClouds': 
     dataSource=OpticalSourceWithClouds()
+elif args.dataset_source=='SARH': 
+    dataSource=SARHSource()
     
 
 def main(_):

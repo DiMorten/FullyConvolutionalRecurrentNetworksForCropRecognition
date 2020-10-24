@@ -49,7 +49,7 @@ class DataForNet(object):
 		n_apriori=16000, squeeze_classes=False, data_dir='data',id_first=1, \
 		train_test_mask_name="TrainTestMask.tif",test_overlap_full=True,ram_store=True,patches_save=False,
 		patch_test_overlap=0, dataSource=SARSource(), dataset=LEM()):
-		self.useHumidity=True
+		#self.useHumidity=True
 		self.dataset = dataset
 		self.dataSource = dataSource
 
@@ -186,11 +186,6 @@ class DataForNet(object):
 		self.ram_data={"train":{},"test":{}}
 		if self.ram_store:
 			print("HEEEERE")
-			if self.useHumidity==True:
-				ram_data_patch_shape=(self.conf["patch"]["size"],self.conf["patch"]["size"],self.conf["band_n"]+1)
-			else:
-				ram_data_patch_shape=self.patch_shape
-
 			self.ram_data["train"]["ims"]=np.zeros((self.conf["train"]["n_apriori"],self.conf["t_len"])+self.patch_shape)
 			self.ram_data["test"]["ims"]=np.zeros((self.conf["test"]["n_apriori"],self.conf["t_len"])+self.patch_shape)
 		
@@ -268,7 +263,7 @@ class DataForNet(object):
 
 
 		#=======================LOAD, NORMALIZE AND MASK FULL IMAGES ================#
-		patch=self.im_load(patch,self.dataset.im_list,self.dataset.label_list,add_id)
+		patch=self.dataset.im_load(patch,self.dataset.im_list,self.dataset.label_list,add_id,self.conf)
 
 		patch["full_ims"] = self.dataSource.clip_undesired_values(patch["full_ims"])
 		
@@ -299,7 +294,7 @@ class DataForNet(object):
 		
 		print("============ Beginning humidity ============")
 		pdb.set_trace()
-		
+		'''		
 		if self.useHumidity:
 			humidity = Humidity(self.dataset)
 			humidity_ims = humidity.loadIms()
@@ -311,7 +306,7 @@ class DataForNet(object):
 			pdb.set_trace()
 
 			self.dataSource.addHumidity() #band_n+=1
-
+		'''
 
 		self.full_label_train,self.full_label_test=self.label_seq_mask(patch["full_label_ims"],patch["train_mask"]) 
 
@@ -392,34 +387,6 @@ class DataForNet(object):
 		return im_names
 		self.im_patches_npy_multitemporal_from_npy_store2(im_names,label_type)
 
-	def im_load(self,patch,im_names,label_names,add_id):
-		fname=sys._getframe().f_code.co_name
-		for t_step in range(0,self.conf["t_len"]):	
-			print(t_step,add_id)
-			deb.prints(self.conf["in_npy_path"]+im_names[t_step]+".npy")
-			#patch["full_ims"][t_step] = np.load(self.conf["in_npy_path"]+names[t_step]+".npy")[:,:,:2]
-			patch["full_ims"][t_step] = self.dataSource.im_load(self.conf["in_npy_path"]+im_names[t_step]+".npy")
-			#patch["full_ims"][t_step] = np.load(self.conf["in_npy_path"]+names[t_step]+".npy")
-			deb.prints(patch["full_ims"].dtype)
-			deb.prints(np.average(patch["full_ims"][t_step]))
-			deb.prints(np.max(patch["full_ims"][t_step]))
-			deb.prints(np.min(patch["full_ims"][t_step]))
-			
-			#deb.prints(patch["full_ims"][t_step].dtype)
-			patch["full_label_ims"][t_step] = cv2.imread(self.conf["path"]+self.label_folder+"/"+label_names[t_step]+".tif",0)
-			print(self.conf["path"]+self.label_folder+"/"+label_names[t_step]+".tif")
-			deb.prints(self.conf["path"]+self.label_folder+"/"+label_names[t_step]+".tif")
-			deb.prints(np.unique(patch["full_label_ims"][t_step],return_counts=True))
-			#for band in range(0,self.conf["band_n"]):
-			#	patch["full_ims_train"][t_step,:,:,band][patch["train_mask"]!=1]=-1
-			# Do the masking here. Do we have the train labels?
-		deb.prints(patch["full_ims"].shape,fname)
-		deb.prints(patch["full_label_ims"].shape,fname)
-		deb.prints(patch["full_ims"].dtype,fname)
-		deb.prints(patch["full_label_ims"].dtype,fname)
-		
-		deb.prints(np.unique(patch['full_label_ims'],return_counts=True))
-		return patch
 		
 
 	def patches_multitemporal_get2(self,img,label,window,overlap,mask,path_train,path_test,patches_save=True, \

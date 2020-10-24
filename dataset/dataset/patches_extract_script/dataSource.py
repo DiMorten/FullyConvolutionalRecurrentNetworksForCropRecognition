@@ -40,7 +40,7 @@ class DataSource(object):
 
 	
 	@abstractmethod
-	def im_load(self,filename):
+	def im_load(self,filename,conf):
 		pass
 
 	def addHumidity(self):
@@ -95,8 +95,26 @@ class SARSource(DataSource):
 	def clip_undesired_values(self, full_ims):
 		full_ims[full_ims>1]=1
 		return full_ims
-	def im_load(self,filename):
+	def im_load(self,filename,conf):
 		return np.load(filename)
+
+
+class SARHSource(SARSource): #SAR+Humidity
+	def __init__(self):
+		
+		super().__init__()
+		#self.name='SARHSource'
+		self.band_n = 3
+	def im_load(self,filename,conf):
+		im_out=np.load(filename)
+		humidity_filename=conf['path']+'humidity/'+filename[18:26]+'_humidity.npy'
+		deb.prints(humidity_filename)
+		#pdb.set_trace()
+		humidity_im=np.expand_dims(np.load(humidity_filename).astype(np.uint8),axis=-1)
+		im_out=np.concatenate((im_out,humidity_im),axis=-1)
+		deb.prints(im_out.shape)
+		#pdb.set_trace()
+		return im_out
 class OpticalSource(DataSource):
 	
 	def __init__(self):
@@ -197,6 +215,35 @@ class Dataset(object):
                                              "%Y%m%d").timetuple()))
 		print(time_delta)
 		return np.asarray(time_delta)
+	def im_load(self,patch,im_names,label_names,add_id,conf):
+		fname=sys._getframe().f_code.co_name
+		for t_step in range(0,conf["t_len"]):	
+			print(t_step,add_id)
+			deb.prints(conf["in_npy_path"]+im_names[t_step]+".npy")
+			#patch["full_ims"][t_step] = np.load(conf["in_npy_path"]+names[t_step]+".npy")[:,:,:2]
+			patch["full_ims"][t_step] = self.dataSource.im_load(conf["in_npy_path"]+im_names[t_step]+".npy",conf)
+			#patch["full_ims"][t_step] = np.load(conf["in_npy_path"]+names[t_step]+".npy")
+			deb.prints(patch["full_ims"].dtype)
+			deb.prints(np.average(patch["full_ims"][t_step]))
+			deb.prints(np.max(patch["full_ims"][t_step]))
+			deb.prints(np.min(patch["full_ims"][t_step]))
+			
+			#deb.prints(patch["full_ims"][t_step].dtype)
+			patch["full_label_ims"][t_step] = cv2.imread(conf["path"]+self.dataSource.label_folder+"/"+label_names[t_step]+".tif",0)
+			print(conf["path"]+self.dataSource.label_folder+"/"+label_names[t_step]+".tif")
+			deb.prints(conf["path"]+self.dataSource.label_folder+"/"+label_names[t_step]+".tif")
+			deb.prints(np.unique(patch["full_label_ims"][t_step],return_counts=True))
+			#for band in range(0,conf["band_n"]):
+			#	patch["full_ims_train"][t_step,:,:,band][patch["train_mask"]!=1]=-1
+			# Do the masking here. Do we have the train labels?
+		deb.prints(patch["full_ims"].shape,fname)
+		deb.prints(patch["full_label_ims"].shape,fname)
+		deb.prints(patch["full_ims"].dtype,fname)
+		deb.prints(patch["full_label_ims"].dtype,fname)
+		
+		deb.prints(np.unique(patch['full_label_ims'],return_counts=True))
+		return patch
+
 class CampoVerde(Dataset):
 	def __init__(self):
 		path="../cv_data/"
