@@ -37,7 +37,7 @@ class DataSource(object):
 		self.foldernameInput = foldernameInput
 		self.label_folder = label_folder
 		self.name=name
-
+		self.channelsToMask=range(self.band_n)
 	
 	@abstractmethod
 	def im_load(self,filename,conf):
@@ -55,6 +55,7 @@ class SARSource(DataSource):
 		label_folder = 'labels'
 		super().__init__(band_n, foldernameInput, label_folder,name)
 
+
 	def im_seq_normalize3(self,im,mask):
 		im_check_flag=False
 		t_steps,h,w,channels=im.shape
@@ -69,15 +70,15 @@ class SARSource(DataSource):
 			deb.prints(np.all(im_check==im))
 		deb.prints(im.shape)
 		mask_flat=np.reshape(mask,-1)
-		train_flat=im_flat[mask_flat==1,:]
+		#train_flat=im_flat[mask_flat==1,:]
 
-		deb.prints(train_flat.shape)
-		print(np.min(train_flat),np.max(train_flat),np.average(train_flat))
+		deb.prints(im_flat[mask_flat==1,:].shape)
+		print(np.min(im_flat[mask_flat==1,:]),np.max(im_flat[mask_flat==1,:]),np.average(im_flat[mask_flat==1,:]))
 
 		scaler=StandardScaler()
-		scaler.fit(train_flat)
-		train_norm_flat=scaler.transform(train_flat)
-		del train_flat
+		scaler.fit(im_flat[mask_flat==1,:])
+		#train_norm_flat=scaler.transform(train_flat)
+		#del train_flat
 
 		im_norm_flat=scaler.transform(im_flat)
 		del im_flat
@@ -105,6 +106,9 @@ class SARHSource(SARSource): #SAR+Humidity
 		super().__init__()
 		#self.name='SARHSource'
 		self.band_n = 3
+		self.channelsToMask=[0,1]
+		#self.channelsToMask=range(self.band_n)
+		
 	def im_load(self,filename,conf):
 		im_out=np.load(filename)
 		humidity_filename=conf['path']+'humidity/'+filename[18:26]+'_humidity.npy'
@@ -243,7 +247,8 @@ class Dataset(object):
 		
 		deb.prints(np.unique(patch['full_label_ims'],return_counts=True))
 		return patch
-
+	def getChannelsToMask(self):
+		return self.dataSource.channelsToMask
 class CampoVerde(Dataset):
 	def __init__(self):
 		path="../cv_data/"

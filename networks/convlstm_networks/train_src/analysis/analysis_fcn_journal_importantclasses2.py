@@ -149,17 +149,22 @@ def experiment_analyze(small_classes_ignore,dataset='cv',
 		prediction_filename='prediction_DenseNetTimeDistributed_blockgoer.npy',
 		prediction_type='npy', mode='each_date',debug=1):
 	#path='/home/lvc/Jorg/igarss/convrnn_remote_sensing/results/seq2seq_ignorelabel/'+dataset+'/'
-	path="../../results/convlstm_results/"+dataset+'/'
+	base_path="../../results/convlstm_results/"
+	path=base_path+dataset+'/'
 	prediction_path=path+prediction_filename
 	path_test='../../../../dataset/dataset/'+dataset+'_data/patches_bckndfixed/test/'
+	print('path_test',path_test)
 	
 	#prediction_type = 'model'
 	if prediction_type=='npy':
 		predictionsLoader = PredictionsLoaderNPY()
 		predictions, label_test = predictionsLoader.loadPredictions(prediction_path,path+'labels.npy')
 	elif prediction_type=='model':	
+		model_path=base_path + 'model/'+dataset+'/'+prediction_filename
+		print('model_path',model_path)
+
 		predictionsLoader = PredictionsLoaderModel(path_test)
-		predictions, label_test = predictionsLoader.loadPredictions(path[:-3] + 'model/'+dataset+'/'+prediction_filename)
+		predictions, label_test = predictionsLoader.loadPredictions(model_path)
 	
 	#predictions=np.load(prediction_path, allow_pickle=True)
 	#label_test=np.load(path+'labels.npy', allow_pickle=True)
@@ -500,8 +505,10 @@ def experiments_plot(metrics,experiment_list,dataset,
 	plt.show()
 
 #dataset='lm_optical_clouds'
-#dataset='lm'
-dataset='cv'
+dataset='lm'
+#dataset='cv'
+#dataset='lm_sarh'
+
 load_metrics=False
 small_classes_ignore=False
 #mode='global'
@@ -686,6 +693,7 @@ elif dataset=='lm':
 		]]
 		experiment_groups=[[ # to demonstrate that h5 is a bit better (not so much) than npy
 			'model_best_BUnet4ConvLSTM_adam_focal.h5',
+			'model_best_BUnet4ConvLSTM_sar_testingbaseline.h5'
 			#'prediction_compare.npy'
 		]]
 		
@@ -706,6 +714,18 @@ elif dataset=='lm_optical_clouds':
 	#	'prediction_bunetconvlstm_clouds2.npy',
 	#	'prediction_bunetconvlstm_clouds_febnew.npy'
 	#]]
+elif dataset=='lm_sarh':
+	exp_id=1
+	experiment_groups=[[
+		'model_best_BUnet4ConvLSTM_adam_focal4_noHmasking.h5',
+		#'model_best_BUnet4ConvLSTM_adam_focal_hmasking.h5'
+	]]
+
+	experiment_groups=[[
+		'model_best_BUnet4ConvLSTM_sarh_tvalue20.h5',
+		#'model_best_BUnet4ConvLSTM_adam_focal_hmasking.h5'
+	]]
+	
 print("Experiment groups",experiment_groups)
 if load_metrics==False:
 	experiment_metrics=experiment_groups_analyze(dataset,experiment_groups,

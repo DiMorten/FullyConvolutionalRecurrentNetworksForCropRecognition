@@ -1008,13 +1008,13 @@ class NetModel(NetObject):
 			max_rate=8,global_average_pooling=False):
 			x=[]
 			if max_rate>=1:
-				x.append(dilated_layer(in_im,filter_size,1))
+				x.append(dilated_layer(in_im,filter_size,1)) # (1,1,1)
 			if max_rate>=2:
-				x.append(dilated_layer(in_im,filter_size,2)) #6
+				x.append(dilated_layer(in_im,filter_size,2)) #6 (1,2,2)
 			if max_rate>=4:
-				x.append(dilated_layer(in_im,filter_size,4)) #12
+				x.append(dilated_layer(in_im,filter_size,4)) #12 (2,4,4)
 			if max_rate>=8:
-				x.append(dilated_layer(in_im,filter_size,8)) #18
+				x.append(dilated_layer(in_im,filter_size,8)) #18 (4,8,8)
 			if global_average_pooling==True:
 				x.append(im_pooling_layer(in_im,filter_size))
 			out = keras.layers.concatenate(x, axis=4)

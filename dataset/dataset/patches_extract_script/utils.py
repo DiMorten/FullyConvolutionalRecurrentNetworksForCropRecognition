@@ -287,13 +287,14 @@ class DataForNet(object):
 
 
 		print("============ Beginning masking ============")
+		print("Channels to mask:",self.dataset.getChannelsToMask())
 		pdb.set_trace()
-
-		self.full_ims_train,self.full_ims_test=self.im_seq_mask(patch["full_ims"],patch["train_mask"])
+	
+		self.full_ims_train,self.full_ims_test=self.im_seq_mask(patch["full_ims"],patch["train_mask"],channels_to_mask=self.dataset.getChannelsToMask())
 		patch["full_ims"]=[]
 		
-		print("============ Beginning humidity ============")
-		pdb.set_trace()
+		#print("============ Beginning humidity ============")
+		#pdb.set_trace()
 		'''		
 		if self.useHumidity:
 			humidity = Humidity(self.dataset)
@@ -806,11 +807,11 @@ class DataForNet(object):
 		print(np.min(im),np.max(im),np.average(im))
 		return im
 
-	def im_seq_mask(self,im,mask):
+	def im_seq_mask(self,im,mask,channels_to_mask):
 		im_train=im.copy()
 		im_test=im.copy()
 		
-		for band in range(0,self.conf["band_n"]):
+		for band in channels_to_mask:
 			for t_step in range(0,self.conf["t_len"]):
 				im_train[t_step,:,:,band][mask!=1]=-2
 				im_test[t_step,:,:,band][mask!=2]=-2

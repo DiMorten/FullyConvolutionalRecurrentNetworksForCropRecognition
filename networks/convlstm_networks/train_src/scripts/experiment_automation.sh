@@ -2,6 +2,7 @@
 id=$1
 model=$2
 dataset=$3 # could be cv or lem
+dataSource=$4
 
 if [ "$dataset" == "cv_seq1" ]
 then
@@ -28,7 +29,21 @@ else
 	sequence_len=13
 	#sequence_len=11
 	class_n=15 # 14+bcknd
+
+	if [ "$dataSource" == "SARH" ]
+	then
+		channel_n=3
+		results_path='../results/convlstm_results/model/lm_sarh/'
+		summary_save_path='../results/convlstm_results/summary/lm_sarh/'
+
+	elif [ "$dataSource" == "SAR" ]
+	then
+		channel_n=2
+	else
+		channel_n=2 #optical missing
+	fi	
 fi
+
 
 stop_epoch=1 # promote to lv2?
 
@@ -48,7 +63,7 @@ stop_epoch=1 # promote to lv2?
 # #model='ConvLSTM_seq2seq_bi' # russworm bi .
 # # ============== EXECUTE EXPERIMENT ===============
 cd ..
-python main.py --stop_epoch=$stop_epoch -pl=32 -pstr=32 -psts=32 -bstr=16 -bsts=16 -path=$dataset_path -tl=$sequence_len -cn=$class_n -chn=2 -mdl=$model
+python main.py --stop_epoch=$stop_epoch -pl=32 -pstr=32 -psts=32 -bstr=16 -bsts=16 -path=$dataset_path -tl=$sequence_len -cn=$class_n -chn=$channel_n -mdl=$model
 # #python main_hdd.py -pl=32 -pstr=32 -psts=32 -path=$dataset_path -tl=$sequence_len -cn=$class_n -chn=2 -mdl=$model
 echo "${filename}_${model}_${id}"
 
