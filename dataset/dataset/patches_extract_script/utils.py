@@ -269,7 +269,7 @@ class DataForNet(object):
 		
 		print(np.min(patch["full_ims"]),np.max(patch["full_ims"]),np.average(patch["full_ims"]))
 		print("============= Normalizing...")		
-		pdb.set_trace()
+		#pdb.set_trace()
 
 		patch["full_ims"]=self.dataSource.im_seq_normalize3(patch["full_ims"],patch["train_mask"])
 
@@ -288,7 +288,7 @@ class DataForNet(object):
 
 		print("============ Beginning masking ============")
 		print("Channels to mask:",self.dataset.getChannelsToMask())
-		pdb.set_trace()
+		#pdb.set_trace()
 	
 		self.full_ims_train,self.full_ims_test=self.im_seq_mask(patch["full_ims"],patch["train_mask"],channels_to_mask=self.dataset.getChannelsToMask())
 		patch["full_ims"]=[]

@@ -1,11 +1,15 @@
 KERAS_BACKEND=tensorflow
-id='sarh_tvalue20'
+#id='sarh_tvalue20'
+#id='sarh_tvalue40fixed'
+id='sarh_tvalue20repeat'
+id='sar_bdenseconvlstm_check128'
+
 
 #dataset='cv'
-dataset='lm'
+dataset='cv'
 ##dataSource='OpticalWithClouds'
+#dataSource='SAR'
 dataSource='SAR'
-#dataSource='SARH'
 
 # ==== EXTRACT PATCHES
 . patches_extract.sh $dataset $dataSource

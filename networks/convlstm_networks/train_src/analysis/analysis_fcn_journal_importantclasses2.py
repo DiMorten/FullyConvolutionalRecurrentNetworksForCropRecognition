@@ -17,6 +17,8 @@ import pdb
 file_id="importantclasses"
 
 from PredictionsLoader import PredictionsLoaderNPY, PredictionsLoaderModel
+
+save_bar_flag=True
 #====================================
 def labels_predictions_filter_transform(label_test,predictions,class_n,
 		debug=1,small_classes_ignore=True,
@@ -284,6 +286,7 @@ def experiment_groups_analyze(dataset,experiment_group,
 		metrics['f1_score']=np.average(np.asarray(
 			[experiment_metrics[int(i)][exp_id]['f1_score'] for i in range(len(experiment_metrics))]),
 			axis=0)
+		
 		print("metrics f1 score",metrics['f1_score'])
 		metrics['overall_acc']=np.average(np.asarray(
 			[experiment_metrics[int(i)][exp_id]['overall_acc'] for i in range(len(experiment_metrics))]),
@@ -340,7 +343,9 @@ def experiments_plot(metrics,experiment_list,dataset,
 	#metrics=metrics[]
 	print("Plotting")
 	for experiment in experiment_list:
-
+		if save_bar_flag==True:
+			print("========== saving bar values npy")
+			np.save('metrics/metrics_'+experiment+'.npy',metrics)
 		#print("experiment",experiment)
 		print(exp_id)
 		metrics[exp_id]['f1_score']=np.transpose(np.asarray(metrics[exp_id]['f1_score']))*100
@@ -379,7 +384,7 @@ def experiments_plot(metrics,experiment_list,dataset,
 				ax.set_ylim(10,80)
 				ax3.set_ylim(70,100)
 			else:
-				ax.set_ylim(10,82)
+				ax.set_ylim(10,85)
 				ax3.set_ylim(35,100)
 			ax.set_xticks(X+width/2)
 			ax.set_xticklabels(xticklabels)
@@ -505,9 +510,9 @@ def experiments_plot(metrics,experiment_list,dataset,
 	plt.show()
 
 #dataset='lm_optical_clouds'
-dataset='lm'
+#dataset='lm'
 #dataset='cv'
-#dataset='lm_sarh'
+dataset='lm_sarh'
 
 load_metrics=False
 small_classes_ignore=False
@@ -691,10 +696,18 @@ elif dataset=='lm':
 			'model_best_compare.h5',
 			'prediction_compare.npy'
 		]]
+
+
+
 		experiment_groups=[[ # to demonstrate that h5 is a bit better (not so much) than npy
-			'model_best_BUnet4ConvLSTM_adam_focal.h5',
-			'model_best_BUnet4ConvLSTM_sar_testingbaseline.h5'
-			#'prediction_compare.npy'
+			'model_best_BUnet4ConvLSTM_baseline.h5',
+			'model_best_BUnet4ConvLSTM_skip.h5',
+			'model_best_BUnet4ConvLSTM_3d.h5'
+		],
+		[ # to demonstrate that h5 is a bit better (not so much) than npy
+			'model_best_BUnet4ConvLSTM_baseline2.h5',
+			'model_best_BUnet4ConvLSTM_skip2.h5'
+			'model_best_BUnet4ConvLSTM_3d2.h5'
 		]]
 		
 elif dataset=='lm_optical':
@@ -717,12 +730,17 @@ elif dataset=='lm_optical_clouds':
 elif dataset=='lm_sarh':
 	exp_id=1
 	experiment_groups=[[
-		'model_best_BUnet4ConvLSTM_adam_focal4_noHmasking.h5',
+		#'model_best_BUnet4ConvLSTM_adam_focal4_noHmasking.h5',
+		#'model_best_BUnet4ConvLSTM_sarh_tvalue20.h5',
+		'model_best_BUnet4ConvLSTM_sarh_tvalue40fixed.h5',	
+		'model_best_BUnet4ConvLSTM_sarh_tvalue20repeat.h5',		
 		#'model_best_BUnet4ConvLSTM_adam_focal_hmasking.h5'
-	]]
-
-	experiment_groups=[[
-		'model_best_BUnet4ConvLSTM_sarh_tvalue20.h5',
+	],
+	[
+		#'model_best_BUnet4ConvLSTM_adam_focal4_noHmasking.h5',
+		#'model_best_BUnet4ConvLSTM_sarh_tvalue20.h5',
+		'model_best_BUnet4ConvLSTM_sarh_tvalue40fixed.h5',	
+		'model_best_BUnet4ConvLSTM_sarh_tvalue20repeat.h5',		
 		#'model_best_BUnet4ConvLSTM_adam_focal_hmasking.h5'
 	]]
 	

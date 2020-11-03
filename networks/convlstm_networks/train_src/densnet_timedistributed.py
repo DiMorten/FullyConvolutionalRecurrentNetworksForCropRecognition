@@ -415,7 +415,7 @@ def __create_fcn_dense_net(nb_classes, img_input, include_top, nb_dense_block=5,
     # The last dense_block does not have a transition_down_block
     # return the concatenated feature maps without the concatenation of the input
 
-    x = Bidirectional(ConvLSTM2D(recurrent_filters, (3, 3), kernel_initializer="he_uniform", padding="same", use_bias=False,
+    x = Bidirectional(ConvLSTM2D(128, (3, 3), kernel_initializer="he_uniform", padding="same", use_bias=False,
                           kernel_regularizer=l2(weight_decay),
                           return_sequences=True))(x)
     print("=============== DENSENET AFTER BIDIRECTIONAL DEBUG =================")
