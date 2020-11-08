@@ -9,7 +9,6 @@ import keras
 import numpy as np
 from sklearn.utils import shuffle
 import cv2
-from skimage.util import view_as_windows
 import argparse
 import tensorflow as tf
 
@@ -29,12 +28,12 @@ from metrics import fmeasure,categorical_accuracy
 import deb
 from keras_weighted_categorical_crossentropy import weighted_categorical_crossentropy, sparse_accuracy_ignoring_last_label, weighted_categorical_crossentropy_ignoring_last_label, categorical_focal_ignoring_last_label, weighted_categorical_focal_ignoring_last_label
 from keras.models import load_model
-from keras.layers import ConvLSTM2D, ConvGRU2D, UpSampling2D, multiply
+from keras.layers import ConvLSTM2D, UpSampling2D, multiply
 from keras.utils.vis_utils import plot_model
 from keras.regularizers import l1,l2
 import time
 import pickle
-from keras_self_attention import SeqSelfAttention
+#from keras_self_attention import SeqSelfAttention
 import pdb
 import pathlib
 from patches_handler import PatchesArray
@@ -98,7 +97,7 @@ deb.prints(args.patch_step_test)
 
 #========= overwrite for direct execution of this py file
 args.stop_epoch=-1
-direct_execution=False
+direct_execution=True
 if direct_execution==True:
 	dataset='cv'
 	#dataset='lm'
@@ -127,14 +126,14 @@ if direct_execution==True:
 			args.channel_n=3
 			args.t_len=13
 
-	##args.model_type='BUnet4ConvLSTM'
+	args.model_type='BUnet4ConvLSTM'
 	#args.model_type='ConvLSTM_seq2seq'
 	#args.model_type='ConvLSTM_seq2seq_bi'
 	#args.model_type='DenseNetTimeDistributed_128x2'
 	#args.model_type='BAtrousGAPConvLSTM'
 	#args.model_type='Unet3D'
 	#args.model_type='BUnet6ConvLSTM'
-	args.model_type='BUnet4ConvLSTM_SkipLSTM'
+	#args.model_type='BUnet4ConvLSTM_SkipLSTM'
 
 def model_summary_print(s):
 	with open('model_summary.txt','w+') as f:
