@@ -13,7 +13,7 @@ from keras.regularizers import l1,l2
 from keras.optimizers import Adam
 from keras.callbacks import EarlyStopping
 import tensorflow as tf
-run_opts = tf.RunOptions(report_tensor_allocations_upon_oom = True)
+run_opts = tf.compat.v1.RunOptions(report_tensor_allocations_upon_oom = True)
 
 class DataGenerator(keras.utils.Sequence):
 	'Generates data for Keras'

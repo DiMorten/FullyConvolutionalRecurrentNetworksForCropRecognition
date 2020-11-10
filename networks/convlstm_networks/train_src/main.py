@@ -1,3 +1,5 @@
+from colorama import init
+init()
 from utils import *
 from keras.layers import Input, Dense, Conv2D, MaxPool2D, Flatten, Dropout, Conv2DTranspose
 # from keras.callbacks import ModelCheckpoint , EarlyStopping
@@ -36,6 +38,7 @@ import pickle
 #from keras_self_attention import SeqSelfAttention
 import pdb
 import pathlib
+from pathlib import Path
 from patches_handler import PatchesArray
 from keras.layers import Conv3DTranspose, Conv3D
 
@@ -96,9 +99,10 @@ deb.prints(args.patch_step_test)
 
 
 #========= overwrite for direct execution of this py file
-args.stop_epoch=-1
 direct_execution=True
 if direct_execution==True:
+	args.stop_epoch=-1
+
 	dataset='cv'
 	#dataset='lm'
 
@@ -179,9 +183,9 @@ class NetObject(object):
 		# they can be loaded after (flag decides whether estimating these values and storing,
 		# or loading the precomputed ones)
 		self.path_patches_bckndfixed = path + 'patches_bckndfixed/' 
-		self.path['train_bckndfixed']=self.path_patches_bckndfixed+'train/'
-		self.path['val_bckndfixed']=self.path_patches_bckndfixed+'val/'
-		self.path['test_bckndfixed']=self.path_patches_bckndfixed+'test/'
+		self.path['train_bckndfixed']=Path(self.path_patches_bckndfixed+'train/')
+		self.path['val_bckndfixed']=Path(self.path_patches_bckndfixed+'val/')
+		self.path['test_bckndfixed']=Path(self.path_patches_bckndfixed+'test/')
 
 		self.channel_n = channel_n
 		deb.prints(self.channel_n)
@@ -374,15 +378,16 @@ class Dataset(NetObject):
 		pathlib.Path(self.path[split]).mkdir(parents=True, exist_ok=True) 
 
 		
-		np.save(self.path[split]+'patches_in.npy', patches['in']) #to-do: add polymorphism for other types of input 
+		np.save(self.path[split]/'patches_in.npy', patches['in']) #to-do: add polymorphism for other types of input 
 		
 		#pathlib.Path(self.path[split]['label']).mkdir(parents=True, exist_ok=True) 
-		np.save(self.path[split]+'patches_label.npy', patches['label']) #to-do: add polymorphism for other types of input 
+		np.save(self.path[split]/'patches_label.npy', patches['label']) #to-do: add polymorphism for other types of input 
 
 	def patchesLoad(self, split='train'):
 		out={}
-		out['in']=np.load(self.path[split]+'patches_in.npy',mmap_mode='r')
-		out['label']=np.load(self.path[split]+'patches_label.npy')
+		out['in']=np.load(self.path[split]/'patches_in.npy',mmap_mode='r')
+		out['label']=np.load(self.path[split]/'patches_label.npy')
+		#pdb.set_trace()
 		return out
 
 	def randomly_pick_samples_from_set(self,patches, out_n):
@@ -2555,7 +2560,7 @@ class ModelLoadEachBatch(NetModel):
 flag = {"data_create": 2, "label_one_hot": True}
 if __name__ == '__main__':
 
-	premade_split_patches_load=False
+	premade_split_patches_load=True
 	
 
 	deb.prints(premade_split_patches_load)
@@ -2704,7 +2709,7 @@ if __name__ == '__main__':
 		deb.prints(data.patches['val']['label'].shape)
 		model.loss_weights=np.load(data.path_patches_bckndfixed+'loss_weights.npy')
 
-	store_patches=True
+	store_patches=False
 	store_patches_each_sample=False
 	if store_patches==True and store_patches_each_sample==True:
 		patchesStorageEachSample = PatchesStorageEachSample(data.path['v'])
