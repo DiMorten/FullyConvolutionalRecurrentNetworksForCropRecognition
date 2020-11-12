@@ -38,7 +38,7 @@ import pickle
 #from keras_self_attention import SeqSelfAttention
 import pdb
 import pathlib
-from pathlib import Path
+from pathlib import Path, PureWindowsPath
 from patches_handler import PatchesArray
 from keras.layers import Conv3DTranspose, Conv3D
 
@@ -99,12 +99,12 @@ deb.prints(args.patch_step_test)
 
 
 #========= overwrite for direct execution of this py file
-direct_execution=True
+direct_execution=False
 if direct_execution==True:
 	args.stop_epoch=-1
 
-	dataset='cv'
-	#dataset='lm'
+	#dataset='cv'
+	dataset='lm'
 
 	#sensor_source='Optical'
 	#sensor_source='OpticalWithClouds'
@@ -174,10 +174,10 @@ class NetObject(object):
 		self.patches['train']['step']=patch_step_train
 		self.patches['test']['step']=patch_step_test 
       
-		self.path['train']['in'] = path + 'train_test/train/ims/'
-		self.path['test']['in'] = path + 'train_test/test/ims/'
-		self.path['train']['label'] = path + 'train_test/train/labels/'
-		self.path['test']['label'] = path + 'train_test/test/labels/'
+		self.path['train']['in'] = Path(path + 'train_test/train/ims/')
+		self.path['test']['in'] = Path(path + 'train_test/test/ims/')
+		self.path['train']['label'] = Path(path + 'train_test/train/labels/')
+		self.path['test']['label'] = Path(path + 'train_test/test/labels/')
 
 		# in these paths, the augmented train set and validation set are stored
 		# they can be loaded after (flag decides whether estimating these values and storing,
@@ -290,9 +290,14 @@ class Dataset(NetObject):
 		return im_one_hot
 
 	def folder_load(self,folder_path): #move to patches_handler
-		paths=glob.glob(folder_path+'*.npy')
+
+		print(folder_path)
+		#paths=glob.glob(paths_npy)
+		paths=list(folder_path.glob('*.npy'))
+
 		files=[]
 		deb.prints(len(paths))
+		
 		for path in paths:
 			#print(path)
 			files.append(np.load(path))
@@ -2560,7 +2565,7 @@ class ModelLoadEachBatch(NetModel):
 flag = {"data_create": 2, "label_one_hot": True}
 if __name__ == '__main__':
 
-	premade_split_patches_load=True
+	premade_split_patches_load=False
 	
 
 	deb.prints(premade_split_patches_load)

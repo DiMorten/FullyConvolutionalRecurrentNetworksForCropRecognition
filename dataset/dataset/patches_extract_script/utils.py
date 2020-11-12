@@ -18,20 +18,22 @@ import glob
 #import matplotlib.pyplot as plt
 import cv2
 import pathlib
+from pathlib import Path
 #from sklearn.feature_extraction.image import extract_patches_2d
 #from skimage.util import view_as_windows
 import sys
 import pickle
 import argparse
 from sklearn.preprocessing import StandardScaler
-from skimage.util import view_as_windows
+#from skimage.util import view_as_windows
 from abc import ABC, abstractmethod
 import pdb
+import shutil
 # Local
 import deb
 from dataSource import DataSource, SARSource, OpticalSource, Dataset, LEM, CampoVerde, OpticalSourceWithClouds, Humidity
 from dataset_stats import DatasetStats
-import pdb
+
 def mask_train_test_switch_from_path(path):
 	mask=cv2.imread(path)
 	out=mask_train_test_switch(mask)
@@ -41,7 +43,9 @@ def mask_train_test_switch(mask):
 	out[mask==1]=2
 	out[mask==2]=1
 	return mask
-
+def remove_folder(dirpath):
+	if dirpath.exists() and dirpath.is_dir():
+		shutil.rmtree(dirpath)
 class DataForNet(object):
 
 	def __init__(self,debug=1,patch_overlap=0,pc_mode="local", \
@@ -65,7 +69,8 @@ class DataForNet(object):
 		self.conf['band_n']=self.dataSource.band_n
 
 		deb.prints(self.conf['path'])
-		os.system("rm -rf ../"+self.conf['path']+"/summaries/*")
+		remove_folder(".."/self.conf['path']/'summaries')
+		#os.system("rm -rf ../"+self.conf['path']+"/summaries/*")
 
 		self.label_folder=self.dataSource.label_folder
 		self.conf["squeeze_classes"]=squeeze_classes
@@ -76,34 +81,34 @@ class DataForNet(object):
 		self.conf["pc_mode"]=pc_mode
 		self.conf['seq']['id_first']=id_first
 		#label_list=os.listdir(self.conf['path']+self.label_folder+"/")
-		deb.prints(self.conf['path']+self.label_folder+"/")
+		deb.prints(self.conf['path']/self.label_folder/"/")
 		#deb.prints(label_list)
 
 		self.conf["label"]["last_name"]=str(self.conf['seq']['id_first']+self.conf['t_len'])+".tif"
-		self.conf["label"]["last_dir"]=self.conf["path"]+self.label_folder+"/"+self.conf["label"]["last_name"]
-		self.conf["out_path"]=self.conf["path"]+"results/"
-		self.conf["in_npy_path"]=self.conf["path"]+self.dataSource.foldernameInput
+		self.conf["label"]["last_dir"]=self.conf["path"]/(self.label_folder+"/"+self.conf["label"]["last_name"])
+		self.conf["out_path"]=self.conf["path"]/"results/"
+		self.conf["in_npy_path"]=self.conf["path"]/self.dataSource.foldernameInput
 		deb.prints(self.conf["in_npy_path"],color=deb.bcolors.OKBLUE)
-		self.conf["in_npy_path2"]=self.conf["path"]+self.dataSource.foldernameInput
+		self.conf["in_npy_path2"]=self.conf["path"]/self.dataSource.foldernameInput
 
-		self.conf["in_rgb_path"]=self.conf["path"]+"in_rgb/"
-		self.conf["in_labels_path"]=self.conf["path"]+self.label_folder+"/"
+		self.conf["in_rgb_path"]=self.conf["path"]/"in_rgb/"
+		self.conf["in_labels_path"]=self.conf["path"]/(self.label_folder+"/")
 		self.conf["patch"]={}
-		self.conf["patch"]={"size":patch_length, "stride":5, "out_npy_path":self.conf["path"]+"patches_npy/"}
+		self.conf["patch"]={"size":patch_length, "stride":5, "out_npy_path":self.conf["path"]/"patches_npy/"}
 		self.conf["patch"]["test_overlap"]=patch_test_overlap
 		
-		self.conf["patch"]["ims_path"]=self.conf["patch"]["out_npy_path"]+"patches_all/"
-		self.conf["patch"]["labels_path"]=self.conf["patch"]["out_npy_path"]+"labels_all/"
+		self.conf["patch"]["ims_path"]=self.conf["patch"]["out_npy_path"]/"patches_all/"
+		self.conf["patch"]["labels_path"]=self.conf["patch"]["out_npy_path"]/"labels_all/"
 		self.conf['patch']['center_pixel']=int(np.around(self.conf["patch"]["size"]/2))
 		deb.prints(self.conf['patch']['center_pixel'])
 		self.conf["train"]={}
 		self.conf["train"]["mask"]={}
-		self.conf["train"]["mask"]["dir"]=self.conf["path"]+train_test_mask_name
-		self.conf["train"]["ims_path"]=self.conf["path"]+"train_test/train/ims/"
-		self.conf["train"]["labels_path"]=self.conf["path"]+"train_test/train/labels/"
+		self.conf["train"]["mask"]["dir"]=self.conf["path"]/train_test_mask_name
+		self.conf["train"]["ims_path"]=self.conf["path"]/"train_test/train/ims/"
+		self.conf["train"]["labels_path"]=self.conf["path"]/"train_test/train/labels/"
 		self.conf["test"]={}
-		self.conf["test"]["ims_path"]=self.conf["path"]+"train_test/test/ims/"
-		self.conf["test"]["labels_path"]=self.conf["path"]+"train_test/test/labels/"
+		self.conf["test"]["ims_path"]=self.conf["path"]/"train_test/test/ims/"
+		self.conf["test"]["labels_path"]=self.conf["path"]/"train_test/test/labels/"
 		self.conf["test"]["overlap_full"]=test_overlap_full
 		
 		#self.conf["im_size"]=im_size
@@ -113,12 +118,12 @@ class DataForNet(object):
 		self.conf["im_3d_size"]=self.conf["im_size"]+(self.conf["band_n"],)
 		self.conf["balanced"]={}
 
-		self.conf["train"]["balanced_path"]=self.conf["path"]+"balanced/train/"
-		self.conf["train"]["balanced_path_ims"]=self.conf["train"]["balanced_path"]+"ims/"
-		self.conf["train"]["balanced_path_label"]=self.conf["train"]["balanced_path"]+"label/"
-		self.conf["test"]["balanced_path"]=self.conf["path"]+"balanced/test/"
-		self.conf["test"]["balanced_path_ims"]=self.conf["test"]["balanced_path"]+"ims/"
-		self.conf["test"]["balanced_path_label"]=self.conf["test"]["balanced_path"]+"label/"
+		self.conf["train"]["balanced_path"]=self.conf["path"]/"balanced/train/"
+		self.conf["train"]["balanced_path_ims"]=self.conf["train"]["balanced_path"]/"ims/"
+		self.conf["train"]["balanced_path_label"]=self.conf["train"]["balanced_path"]/"label/"
+		self.conf["test"]["balanced_path"]=self.conf["path"]/"balanced/test/"
+		self.conf["test"]["balanced_path_ims"]=self.conf["test"]["balanced_path"]/"ims/"
+		self.conf["test"]["balanced_path_label"]=self.conf["test"]["balanced_path"]/"label/"
 
 		self.conf["extract"]={}
 
@@ -150,7 +155,7 @@ class DataForNet(object):
 			self.conf["subdata"]={"flag":True,"n":1000}
 		#self.conf["subdata"]={"flag":True,"n":500}
 		#self.conf["subdata"]={"flag":True,"n":1000}
-		self.conf["summaries_path"]=self.conf["path"]+"summaries/"
+		self.conf["summaries_path"]=self.conf["path"]/"summaries/"
 
 		if balance_samples_per_class:
 			self.conf["balanced"]["samples_per_class"]=balance_samples_per_class
@@ -250,7 +255,9 @@ class DataForNet(object):
 		#im_filenames=self.im_filenames_get()
 
 		patch={}
-		patch["train_mask"]=cv2.imread(self.conf["train"]["mask"]["dir"],-1).astype(np.uint8)
+		deb.prints(self.conf["train"]["mask"]["dir"])
+		pdb.set_trace()
+		patch["train_mask"]=cv2.imread(str(self.conf["train"]["mask"]["dir"]),-1).astype(np.uint8)
 
 		deb.prints((self.conf["t_len"],)+self.patch_shape)
 
@@ -603,8 +610,8 @@ class DataForNet(object):
 						else:
 							label_patch_parsed=label_patch.copy()
 						#print("HEERERER")
-						np.save(path_train["ims_path"]+"patch_"+str(patches_get["train_n"])+"_"+str(i)+"_"+str(j)+".npy",patch)
-						np.save(path_train["labels_path"]+"patch_"+str(patches_get["train_n"])+"_"+str(i)+"_"+str(j)+".npy",label_patch_parsed)
+						np.save(path_train["ims_path"]/("patch_"+str(patches_get["train_n"])+"_"+str(i)+"_"+str(j)+".npy"),patch)
+						np.save(path_train["labels_path"]/("patch_"+str(patches_get["train_n"])+"_"+str(i)+"_"+str(j)+".npy"),label_patch_parsed)
 
 					patches_get["train_n"]+=1	
 				is_mask_from_test=self.is_mask_from_test(mask_patch,label_patch)
@@ -644,8 +651,8 @@ class DataForNet(object):
 								label_patch_parsed=self.labels_unused_classes_eliminate(label_patch,training=False)
 							else:
 								label_patch_parsed=label_patch.copy()
-							np.save(path_test["ims_path"]+"patch_"+str(test_real_count)+"_"+str(i)+"_"+str(j)+".npy",patch)
-							np.save(path_test["labels_path"]+"patch_"+str(test_real_count)+"_"+str(i)+"_"+str(j)+".npy",label_patch_parsed)
+							np.save(path_test["ims_path"]/("patch_"+str(test_real_count)+"_"+str(i)+"_"+str(j)+".npy"),patch)
+							np.save(path_test["labels_path"]/("patch_"+str(test_real_count)+"_"+str(i)+"_"+str(j)+".npy"),label_patch_parsed)
 
 						test_real_count+=1
 					#np.random.choice(index, samples_per_class, replace=replace)
@@ -877,7 +884,7 @@ class DataSemantic(DataForNet):
 		deb.prints(self.ram_data["test"]["labels"].dtype)
 
 	def create(self):
-		os.system("rm -rf "+self.conf["path"]+"train_test")
+		remove_folder(self.conf["path"]/"train_test")
 
 		#os.system("rm -rf ../data/train_test")
 
@@ -1028,8 +1035,8 @@ class DataOneHot(DataForNet):
 		self.ram_data["test"]["labels"]=self.labels_onehot_get(self.ram_data["test"]["labels_int"], \
 			self.ram_data["test"]["n"],self.conf["class_n"])
 	def create(self):
-		os.system("rm -rf "+self.conf["path"]+"train_test")
-
+		#os.system("rm -rf "+self.conf["path"]+"train_test")
+		remove_folder(self.conf["path"]/"train_test")
 #		os.system("rm -rf ../data/train_test")
 		print(1)
 		if self.conf["memory_mode"]=="ram":
@@ -1088,7 +1095,8 @@ class DataOneHot(DataForNet):
 		print(list(iter(data)))
 		if self.conf["utils_flag_store"]:
 			# Store data train, test ims and labels_one_hot
-			os.system("rm -rf "+self.conf["path"]+"balanced")
+			#os.system("rm -rf "+self.conf["path"]+"balanced")
+			remove_folder(self.conf["path"]/"balanced")
 #			os.system("rm -rf ../data/balanced")
 			self.data_save_to_npy(self.conf["train"],data["train"])
 			self.data_save_to_npy(self.conf["test"],data["test"])	

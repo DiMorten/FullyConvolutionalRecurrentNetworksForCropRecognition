@@ -53,7 +53,7 @@ def weighted_categorical_crossentropy_ignoring_last_label(weights):
         #log_softmax = tf.log(y_pred)
         #log_softmax = K.log(y_pred)
 
-        y_true = K.one_hot(tf.compat.v1.to_int32(K.flatten(y_true)), K.int_shape(y_pred)[-1]+1)
+        y_true = K.one_hot(tf.to_int32(K.flatten(y_true)), K.int_shape(y_pred)[-1]+1)
         unpacked = tf.unstack(y_true, axis=-1)
         y_true = tf.stack(unpacked[:-1], axis=-1)
 
@@ -86,7 +86,7 @@ def categorical_focal_ignoring_last_label(alpha=0.25,gamma=2):
         #log_softmax = tf.log(y_pred)
         #log_softmax = K.log(y_pred)
 
-        y_true = K.one_hot(tf.compat.v1.to_int32(K.flatten(y_true)), K.int_shape(y_pred)[-1]+1)
+        y_true = K.one_hot(tf.to_int32(K.flatten(y_true)), K.int_shape(y_pred)[-1]+1)
         unpacked = tf.unstack(y_true, axis=-1)
         y_true = tf.stack(unpacked[:-1], axis=-1)
         focal_term = alpha * K.pow(1. - y_pred_softmax, gamma)
@@ -114,7 +114,7 @@ def weighted_categorical_focal_ignoring_last_label(weights, alpha=0.25,gamma=2):
         y_pred = K.reshape(y_pred, (-1, K.int_shape(y_pred)[-1]))
         y_pred_softmax = tf.nn.softmax(y_pred) # I should do softmax before the loss
 
-        y_true = K.one_hot(tf.compat.v1.to_int32(K.flatten(y_true)), K.int_shape(y_pred)[-1]+1)
+        y_true = K.one_hot(tf.to_int32(K.flatten(y_true)), K.int_shape(y_pred)[-1]+1)
         unpacked = tf.unstack(y_true, axis=-1)
         y_true = tf.stack(unpacked[:-1], axis=-1)
         focal_term = alpha * K.pow(1. - y_pred_softmax, gamma)
@@ -128,7 +128,7 @@ def softmax_sparse_crossentropy_ignoring_last_label(y_true, y_pred):
     y_pred = K.reshape(y_pred, (-1, K.int_shape(y_pred)[-1]))
     log_softmax = tf.nn.log_softmax(y_pred)
 
-    y_true = K.one_hot(tf.compat.v1.to_int32(K.flatten(y_true)), K.int_shape(y_pred)[-1]+1)
+    y_true = K.one_hot(tf.to_int32(K.flatten(y_true)), K.int_shape(y_pred)[-1]+1)
     unpacked = tf.unstack(y_true, axis=-1)
     y_true = tf.stack(unpacked[:-1], axis=-1)
 
@@ -143,7 +143,7 @@ def sparse_accuracy_ignoring_last_label(y_true, y_pred):
     nb_classes = K.int_shape(y_pred)[-1]
     y_pred = K.reshape(y_pred, (-1, nb_classes))
 
-    y_true = K.one_hot(tf.compat.v1.to_int32(K.flatten(y_true)),
+    y_true = K.one_hot(tf.to_int32(K.flatten(y_true)),
                        nb_classes + 1)
     unpacked = tf.unstack(y_true, axis=-1)
     legal_labels = ~tf.cast(unpacked[-1], tf.bool)

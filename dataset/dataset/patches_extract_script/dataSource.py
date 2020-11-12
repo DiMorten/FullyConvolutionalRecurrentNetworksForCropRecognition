@@ -18,6 +18,7 @@ import glob
 #import matplotlib.pyplot as plt
 import cv2
 import pathlib
+from pathlib import Path
 #from sklearn.feature_extraction.image import extract_patches_2d
 #from skimage.util import view_as_windows
 import sys
@@ -26,7 +27,6 @@ import pickle
 import deb
 import argparse
 from sklearn.preprocessing import StandardScaler
-from skimage.util import view_as_windows
 #import natsort
 from abc import ABC, abstractmethod
 import time, datetime
@@ -111,7 +111,7 @@ class SARHSource(SARSource): #SAR+Humidity
 		
 	def im_load(self,filename,conf):
 		im_out=np.load(filename)
-		humidity_filename=conf['path']+'humidity/'+filename[18:26]+'_humidity.npy'
+		humidity_filename=conf['path']/('humidity/'+filename[18:26]+'_humidity.npy')
 		deb.prints(humidity_filename)
 		#pdb.set_trace()
 		humidity_im=np.expand_dims(np.load(humidity_filename).astype(np.uint8),axis=-1)
@@ -196,7 +196,7 @@ class OpticalSourceWithClouds(OpticalSource):
 
 class Dataset(object):
 	def __init__(self,path,im_h,im_w,class_n,class_list):
-		self.path=path
+		self.path=Path(path)
 		self.class_n=class_n
 		self.im_h=im_h
 		self.im_w=im_w
@@ -223,9 +223,9 @@ class Dataset(object):
 		fname=sys._getframe().f_code.co_name
 		for t_step in range(0,conf["t_len"]):	
 			print(t_step,add_id)
-			deb.prints(conf["in_npy_path"]+im_names[t_step]+".npy")
+			deb.prints(conf["in_npy_path"]/(im_names[t_step]+".npy"))
 			#patch["full_ims"][t_step] = np.load(conf["in_npy_path"]+names[t_step]+".npy")[:,:,:2]
-			patch["full_ims"][t_step] = self.dataSource.im_load(conf["in_npy_path"]+im_names[t_step]+".npy",conf)
+			patch["full_ims"][t_step] = self.dataSource.im_load(conf["in_npy_path"]/(im_names[t_step]+".npy"),conf)
 			#patch["full_ims"][t_step] = np.load(conf["in_npy_path"]+names[t_step]+".npy")
 			deb.prints(patch["full_ims"].dtype)
 			deb.prints(np.average(patch["full_ims"][t_step]))
@@ -233,9 +233,9 @@ class Dataset(object):
 			deb.prints(np.min(patch["full_ims"][t_step]))
 			
 			#deb.prints(patch["full_ims"][t_step].dtype)
-			patch["full_label_ims"][t_step] = cv2.imread(conf["path"]+self.dataSource.label_folder+"/"+label_names[t_step]+".tif",0)
-			print(conf["path"]+self.dataSource.label_folder+"/"+label_names[t_step]+".tif")
-			deb.prints(conf["path"]+self.dataSource.label_folder+"/"+label_names[t_step]+".tif")
+			patch["full_label_ims"][t_step] = cv2.imread(str(conf["path"]/(self.dataSource.label_folder+"/"+label_names[t_step]+".tif")),0)
+			print(conf["path"]/(self.dataSource.label_folder+"/"+label_names[t_step]+".tif"))
+			deb.prints(conf["path"]/(self.dataSource.label_folder+"/"+label_names[t_step]+".tif"))
 			deb.prints(np.unique(patch["full_label_ims"][t_step],return_counts=True))
 			#for band in range(0,conf["band_n"]):
 			#	patch["full_ims_train"][t_step,:,:,band][patch["train_mask"]!=1]=-1

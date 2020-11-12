@@ -20,6 +20,7 @@ then
 	dataset_path="../../../dataset/dataset/cv_data/"
 	sequence_len=14
 	class_n=12
+	channel_n=2
 
 else
 	filename="lm"
