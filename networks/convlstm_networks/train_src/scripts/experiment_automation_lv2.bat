@@ -4,7 +4,8 @@
 ::id='sarh_tvalue20'
 ::id='sarh_tvalue40fixed'
 ::id='sarh_tvalue20repeat'
-set id=windows_test
+:: set id=windows_test
+set id=int16_x13
 
 
 ::dataset='cv'

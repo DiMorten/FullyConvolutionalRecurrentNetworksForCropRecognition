@@ -2315,7 +2315,7 @@ class NetModel(NetObject):
 		self.batch['test']['n'] = data.patches['test']['in'].shape[0] // self.batch['test']['size']
 		self.batch['val']['n'] = data.patches['val']['in'].shape[0] // self.batch['val']['size']
 
-		data.patches['test']['prediction']=np.zeros_like(data.patches['test']['label'][:,:,:,:,:-1])
+		data.patches['test']['prediction']=np.zeros_like(data.patches['test']['label'][:,:,:,:,:-1], dtype=np.float32)
 		deb.prints(data.patches['test']['label'].shape)
 		deb.prints(self.batch['test']['n'])
 		
@@ -2362,13 +2362,13 @@ class NetModel(NetObject):
 			self.train_predict=True
 			#pdb.set_trace()
 			#if self.train_predict:
-
+			prediction_dtype=np.float32
 
             
 			#================== VAL LOOP=====================#
 			if self.val_set:
 				deb.prints(data.patches['val']['label'].shape)
-				data.patches['val']['prediction']=np.zeros_like(data.patches['val']['label'][:,:,:,:,:-1])
+				data.patches['val']['prediction']=np.zeros_like(data.patches['val']['label'][:,:,:,:,:-1],dtype=prediction_dtype)
 				self.batch_test_stats=False
 
 				for batch_id in range(0, self.batch['val']['n']):
@@ -2384,7 +2384,7 @@ class NetModel(NetObject):
 							np.expand_dims(batch['val']['label'].argmax(axis=4),axis=4).astype(np.int8))		# Accumulated epoch
 
 					data.patches['val']['prediction'][idx0:idx1]=self.graph.predict(
-						batch['val']['in'].astype(np.float32),batch_size=self.batch['val']['size'])
+						batch['val']['in'].astype(np.float32),batch_size=self.batch['val']['size']).astype(prediction_dtype)
 				self.metrics['val']['loss'] /= self.batch['val']['n']
 
 				metrics_val=data.metrics_get(data.patches['val']['prediction'],data.patches['val']['label'],debug=2)
@@ -2414,7 +2414,8 @@ class NetModel(NetObject):
 				# 	txt['val']['metrics'].append(metrics_val)
 				# 	txt['val']['loss'].append(self.metrics['val']['loss'])
 				# 	txt['val']['epoch'].append(epoch)
-
+			#print("Val predictions unique",np.unique(data.patches['val']['prediction'],return_counts=True))
+			#pdb.set_trace()
 			
 			#==========================TEST LOOP================================================#
 			if self.early_stop['signal']==True:
@@ -2426,8 +2427,9 @@ class NetModel(NetObject):
 			deb.prints(self.stop_epoch==epoch)
 			
 			if test_loop_each_epoch==True or self.early_stop['signal']==True or (self.stop_epoch>=0 and self.stop_epoch==epoch):
+				
 				print("======== BEGINNING TEST PREDICT... ============")
-				data.patches['test']['prediction']=np.zeros_like(data.patches['test']['label'][:,:,:,:,:-1])
+				data.patches['test']['prediction']=np.zeros_like(data.patches['test']['label'][:,:,:,:,:-1],dtype=prediction_dtype)#.astype(prediction_dtype)
 				self.batch_test_stats=False
 
 				for batch_id in range(0, self.batch['test']['n']):
@@ -2440,13 +2442,15 @@ class NetModel(NetObject):
 					if self.batch_test_stats:
 						self.metrics['test']['loss'] += self.graph.test_on_batch(
 							batch['test']['in'].astype(np.float32), 
-							np.expand_dims(batch['test']['label'].argmax(axis=4),axis=4).astype(np.int8))		# Accumulated epoch
+							np.expand_dims(batch['test']['label'].argmax(axis=4),axis=4).astype(np.int16))		# Accumulated epoch
 
 					data.patches['test']['prediction'][idx0:idx1]=self.graph.predict(
-						batch['test']['in'].astype(np.float32),batch_size=self.batch['test']['size'])
+						batch['test']['in'].astype(np.float32),batch_size=self.batch['test']['size']).astype(prediction_dtype)
 			#====================METRICS GET================================================#
 			deb.prints(data.patches['test']['label'].shape)	
 			deb.prints(data.patches['test']['prediction'].dtype)
+			deb.prints(data.patches['val']['prediction'].dtype)
+
 			#pdb.set_trace()
 
 			deb.prints(idx1)
@@ -2608,9 +2612,9 @@ if __name__ == '__main__':
 
 
 	#adam = Adam(lr=0.0001, beta_1=0.9)
-	adam = Adam(lr=0.001, beta_1=0.9)
+	#adam = Adam(lr=0.001, beta_1=0.9)
 	
-	#adam = Adagrad(0.01)
+	adam = Adagrad(0.01)
 	#model = ModelLoadEachBatch(epochs=args.epochs, patch_len=args.patch_len,
 	model = NetModel(epochs=args.epochs, patch_len=args.patch_len,
 					 patch_step_train=args.patch_step_train, eval_mode=args.eval_mode,
@@ -2748,8 +2752,8 @@ if __name__ == '__main__':
 	#metrics=['accuracy',fmeasure,categorical_accuracy]
 
 
-	#loss=weighted_categorical_crossentropy_ignoring_last_label(model.loss_weights_ones)
-	loss=categorical_focal_ignoring_last_label(alpha=0.25,gamma=2)
+	loss=weighted_categorical_crossentropy_ignoring_last_label(model.loss_weights_ones)
+	#loss=categorical_focal_ignoring_last_label(alpha=0.25,gamma=2)
 	#loss=weighted_categorical_focal_ignoring_last_label(model.loss_weights,alpha=0.25,gamma=2)
 
 	model.graph.compile(loss=loss,
