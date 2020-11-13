@@ -256,7 +256,7 @@ def experiment_groups_analyze(dataset,experiment_group,mode='each_date'):
 		print(len(experiment_metrics[0]))
 		print(experiment_metrics[0][0])
 		print(experiment_metrics[0][0]['f1_score'])
-		print(experiment_metrics[1][0]['f1_score'])
+		#print(experiment_metrics[1][0]['f1_score'])
 
 		print("exp_id",exp_id)
 
@@ -330,7 +330,7 @@ def experiment_groups_analyze(dataset,experiment_group,mode='each_date'):
 def experiments_plot(metrics,experiment_list,dataset):
 
 
-
+	print(metrics)
 	t_len=len(metrics[0]['f1_score'])
 	print("t_len",t_len)
 	indices = range(t_len) # t_len
@@ -398,23 +398,52 @@ load_metrics=False
 #mode='global'
 mode='each_date'
 if dataset=='cv':
+# 	experiment_groups=[[
+# 		'prediction_ConvLSTM_seq2seq_batch16_full.npy',
+# 		'prediction_ConvLSTM_seq2seq_bi_batch16_full.npy',
+# ##		'prediction_ConvLSTM_seq2seq_bi_redoing.npy',
+# 		'prediction_DenseNetTimeDistributed_128x2_batch16_full.npy'],
+
+# 		['prediction_ConvLSTM_seq2seq_redoing.npy',
+# 		'prediction_ConvLSTM_seq2seq_bi_redoing.npy',
+# 		'prediction_DenseNetTimeDistributed_128x2_redoing.npy'],
+
+# 		['prediction_ConvLSTM_seq2seq_redoingz.npy',
+# 		'prediction_ConvLSTM_seq2seq_bi_redoingz.npy',
+# 		'prediction_DenseNetTimeDistributed_128x2_redoingz.npy'],
+# 		['prediction_ConvLSTM_seq2seq_redoingz2.npy',
+# 		'prediction_ConvLSTM_seq2seq_bi_redoingz2.npy',
+# 		'prediction_DenseNetTimeDistributed_128x2_redoingz2.npy']]
 	experiment_groups=[[
-		'prediction_pyramid_dilated_bconvlstm_dilated.npy',
-		'prediction_FCN_ConvLSTM_seq2seq_bi_skip_dilated.npy',
-##		'prediction_ConvLSTM_seq2seq_bi_redoing.npy',
-		'prediction_DenseNetTimeDistributed_128x2_batch16_full.npy'],
+		'prediction_ConvLSTM_seq2seq_batch16_full.npy',
+		'prediction_ConvLSTM_seq2seq_bi_batch16_full.npy',
+		'prediction_DenseNetTimeDistributed_128x2_batch16_full.npy',
+		'prediction_BUnet4ConvLSTM_repeating1.npy',
+		'prediction_BAtrousGAPConvLSTM_raulapproved.npy',
+		],
 
-		['prediction_pyramid_dilated_bconvlstm_dilated.npy',
-		'prediction_FCN_ConvLSTM_seq2seq_bi_skip_dilated2.npy',
-		'prediction_DenseNetTimeDistributed_128x2_redoing.npy'],
+		['prediction_ConvLSTM_seq2seq_redoing.npy',
+		'prediction_ConvLSTM_seq2seq_bi_redoing.npy',
+		'prediction_DenseNetTimeDistributed_128x2_redoing.npy',
+		'prediction_BUnet4ConvLSTM_repeating1.npy',
+		'prediction_BAtrousGAPConvLSTM_raulapproved.npy',
 
-		['prediction_pyramid_dilated_bconvlstm_dilated.npy',
-		'prediction_FCN_ConvLSTM_seq2seq_bi_skip_dilated2.npy',
-		'prediction_DenseNetTimeDistributed_128x2_redoingz.npy'],
-		['prediction_pyramid_dilated_bconvlstm_dilated.npy',
-		'prediction_FCN_ConvLSTM_seq2seq_bi_skip_dilated.npy',
-		'prediction_DenseNetTimeDistributed_128x2_redoingz2.npy']]
-	experiment_groups=[['model_best_BUnet4ConvLSTM_windows_test.h5']]
+		],
+		['prediction_ConvLSTM_seq2seq_redoingz.npy',
+		'prediction_ConvLSTM_seq2seq_bi_redoingz.npy',
+		'prediction_DenseNetTimeDistributed_128x2_redoingz2.npy',
+		'prediction_BUnet4ConvLSTM_repeating2.npy',
+		'prediction_BAtrousGAPConvLSTM_repeating3.npy',
+
+		],
+		['prediction_ConvLSTM_seq2seq_redoingz2.npy',
+		'prediction_ConvLSTM_seq2seq_bi_redoingz2.npy',
+		'prediction_DenseNetTimeDistributed_128x2_redoing3.npy',
+		'prediction_BUnet4ConvLSTM_repeating4.npy',
+		'prediction_BAtrousGAPConvLSTM_repeating4.npy',
+		]]
+	experiment_groups=[['model_best_BUnet4ConvLSTM_windows_test.h5'],
+		['model_best_BUnet4ConvLSTM_windows_test.h5']]
 ##		'prediction_DenseNetTimeDistributed_128x2_redoing.npy']
 		##'prediction_ConvLSTM_seq2seq_loneish.npy',
 		##'prediction_ConvLSTM_seq2seq_bi_loneish.npy',
@@ -424,20 +453,44 @@ if dataset=='cv':
 		#'prediction_DenseNetTimeDistributed_128x2_filtersizefix2.npy']
 elif dataset=='lm':
 
+	# experiment_groups=[[
+	# 	'prediction_ConvLSTM_seq2seq_batch16_full.npy',
+	# 	'prediction_ConvLSTM_seq2seq_bi_batch16_full.npy',
+	# 	'prediction_DenseNetTimeDistributed_128x2_batch16_full.npy'],
+	# 	['prediction_ConvLSTM_seq2seq_redoing.npy',
+	# 	'prediction_ConvLSTM_seq2seq_bi_redoing.npy',
+	# 	'prediction_DenseNetTimeDistributed_128x2_redoing.npy'],
+	# 	['prediction_ConvLSTM_seq2seq_redoingz.npy',
+	# 	'prediction_ConvLSTM_seq2seq_bi_redoingz.npy',
+	# 	'prediction_DenseNetTimeDistributed_128x2_redoingz.npy'],
+	# 	['prediction_ConvLSTM_seq2seq_redoingz2.npy',
+	# 	'prediction_ConvLSTM_seq2seq_bi_redoingz2.npy',
+	# 	'prediction_DenseNetTimeDistributed_128x2_redoingz2.npy']]
 	experiment_groups=[[
-		'prediction_ConvLSTM_seq2seq_batch16_full.npy',
-		'prediction_ConvLSTM_seq2seq_bi_batch16_full.npy',
-		'prediction_DenseNetTimeDistributed_128x2_batch16_full.npy'],
-		['prediction_ConvLSTM_seq2seq_redoing.npy',
-		'prediction_ConvLSTM_seq2seq_bi_redoing.npy',
-		'prediction_DenseNetTimeDistributed_128x2_redoing.npy'],
-		['prediction_ConvLSTM_seq2seq_redoingz.npy',
-		'prediction_ConvLSTM_seq2seq_bi_redoingz.npy',
-		'prediction_DenseNetTimeDistributed_128x2_redoingz.npy'],
-		['prediction_ConvLSTM_seq2seq_redoingz2.npy',
-		'prediction_ConvLSTM_seq2seq_bi_redoingz2.npy',
-		'prediction_DenseNetTimeDistributed_128x2_redoingz2.npy']]
-
+			'prediction_ConvLSTM_seq2seq_batch16_full.npy',
+			'prediction_ConvLSTM_seq2seq_bi_batch16_full.npy',
+			'prediction_DenseNetTimeDistributed_128x2_batch16_full.npy',
+			'prediction_BUnet4ConvLSTM_repeating1.npy',
+			'prediction_BAtrousGAPConvLSTM_raulapproved.npy',
+			],
+			['prediction_ConvLSTM_seq2seq_redoing.npy',
+			'prediction_ConvLSTM_seq2seq_bi_redoing.npy',
+			'prediction_DenseNetTimeDistributed_128x2_redoing.npy',
+			'prediction_BUnet4ConvLSTM_repeating2.npy',
+			'prediction_BAtrousGAPConvLSTM_repeating6.npy',
+			],
+			['prediction_ConvLSTM_seq2seq_redoingz.npy',
+			'prediction_ConvLSTM_seq2seq_bi_redoingz.npy',
+			'prediction_DenseNetTimeDistributed_128x2_redoingz.npy',
+			'prediction_BUnet4ConvLSTM_repeating4.npy',
+			'prediction_BAtrousGAPConvLSTM_repeating4.npy',
+			],
+			['prediction_ConvLSTM_seq2seq_redoingz2.npy',
+			'prediction_ConvLSTM_seq2seq_bi_redoingz2.npy',
+			'prediction_DenseNetTimeDistributed_128x2_redoingz2.npy',
+			'prediction_BUnet4ConvLSTM_repeating6.npy',
+			'prediction_BAtrousGAPConvLSTM_repeating3.npy',
+			],]
 if load_metrics==False:
 	experiment_metrics=experiment_groups_analyze(dataset,experiment_groups,
 		mode=mode)

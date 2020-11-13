@@ -8,7 +8,7 @@ import keras
 import numpy as np
 from sklearn.utils import shuffle
 import cv2
-from skimage.util import view_as_windows
+#from skimage.util import view_as_windows
 import argparse
 import tensorflow as tf
 

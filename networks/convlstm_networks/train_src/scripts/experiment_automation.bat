@@ -9,7 +9,7 @@ echo %dataset%
 echo 'cv' 
 IF %dataset%=='cv' (
 	set filename=campo_verde
-	set results_path='../results/convlstm_results/model/cv/
+	set results_path=../results/convlstm_results/model/cv/
 	set summary_save_path=../results/convlstm_results/summary/cv/
 	set dataset_path=../../../dataset/dataset/cv_data/
 	set sequence_len=14
@@ -75,19 +75,19 @@ python main.py --stop_epoch=%stop_epoch% -pl=32 -pstr=32 -psts=32 -bstr=16 -bsts
 :: =============== MOVE PREDICTIONS TO RESULT FOLDER ======
 ::results_path='../results/seq2seq_ignorelabel/cv/'
 
+echo %results_path%model_best_%model%_%id%.h5 
 
 set word=\
 call set results_path=%%results_path:/=%word%%%
 echo %results_path%model_best_%model%_%id%.h5 
 
-xcopy /s model_best.h5 %results_path%model_best_%model%_%id%.h5 
-:: cp model_best.h5 %results_path%model_best_%model%_%id%.h5
-::cp prediction.npy "${results_path}prediction_${model}_${id}.npy"
+xcopy model_best.h5 %results_path%model_best_%model%_%id%.h5 /f /y
+ 
 
 set word=\
 call set summary_save_path=%%summary_save_path:/=%word%%%
 echo %summary_save_path%summary_%model%_%id%.txt
 
-xcopy /s model_summary.txt %summary_save_path%summary_%model%_%id%.txt
+xcopy model_summary.txt %summary_save_path%summary_%model%_%id%.txt /f /y
 cd scripts
 

@@ -9,9 +9,9 @@ import glob
 import os
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import confusion_matrix,f1_score,accuracy_score,classification_report,recall_score,precision_score
-from sklearn.externals import joblib
+#from sklearn.externals import joblib
 import matplotlib.pyplot as plt
-import pandas as pd
+#import pandas as pd
 import cv2
 import pdb
 file_id="importantclasses"
@@ -517,8 +517,8 @@ def experiments_plot(metrics,experiment_list,dataset,
 
 #dataset='lm_optical_clouds'
 #dataset='lm'
-#dataset='cv'
-dataset='lm_sarh'
+dataset='cv'
+#dataset='lm_sarh'
 
 load_metrics=False
 small_classes_ignore=False
@@ -543,7 +543,7 @@ if dataset=='cv':
 		['prediction_ConvLSTM_seq2seq_redoingz2.npy',
 		'prediction_ConvLSTM_seq2seq_bi_redoing3.npy',
 		'prediction_DenseNetTimeDistributed_128x2_redoing3.npy']]
-	exp_id=4 
+	exp_id=5
 
 	if exp_id==1:
 		experiment_groups=[[#'prediction_deeplabv3plus_v3plus2.npy',
@@ -577,7 +577,8 @@ if dataset=='cv':
 			'model_best_Unet3D_16_adam_focal.h5',
 			'model_best_Unet3D_adam_focal3.h5',
 			'model_best_Unet3D_adam_focal4.h5']]
-		
+	elif exp_id==5:
+		experiment_groups=[['model_best_BUnet4ConvLSTM_windows_test.h5']]
 elif dataset=='lm':
 
 	experiment_groups=[[
