@@ -104,7 +104,7 @@ if direct_execution==True:
 	args.stop_epoch=-1
 
 	#dataset='cv'
-	dataset='lm'
+	dataset='cv'
 
 	#sensor_source='Optical'
 	#sensor_source='OpticalWithClouds'
@@ -174,18 +174,18 @@ class NetObject(object):
 		self.patches['train']['step']=patch_step_train
 		self.patches['test']['step']=patch_step_test 
       
-		self.path['train']['in'] = Path(path + 'train_test/train/ims/')
-		self.path['test']['in'] = Path(path + 'train_test/test/ims/')
-		self.path['train']['label'] = Path(path + 'train_test/train/labels/')
-		self.path['test']['label'] = Path(path + 'train_test/test/labels/')
+		self.path['train']['in'] = path + 'train_test/train/ims/'
+		self.path['test']['in'] = path + 'train_test/test/ims/'
+		self.path['train']['label'] = path + 'train_test/train/labels/'
+		self.path['test']['label'] = path + 'train_test/test/labels/'
 
 		# in these paths, the augmented train set and validation set are stored
 		# they can be loaded after (flag decides whether estimating these values and storing,
 		# or loading the precomputed ones)
 		self.path_patches_bckndfixed = path + 'patches_bckndfixed/' 
-		self.path['train_bckndfixed']=Path(self.path_patches_bckndfixed+'train/')
-		self.path['val_bckndfixed']=Path(self.path_patches_bckndfixed+'val/')
-		self.path['test_bckndfixed']=Path(self.path_patches_bckndfixed+'test/')
+		self.path['train_bckndfixed']=self.path_patches_bckndfixed+'train/'
+		self.path['val_bckndfixed']=self.path_patches_bckndfixed+'val/'
+		self.path['test_bckndfixed']=self.path_patches_bckndfixed+'test/'
 
 		self.channel_n = channel_n
 		deb.prints(self.channel_n)
@@ -290,14 +290,9 @@ class Dataset(NetObject):
 		return im_one_hot
 
 	def folder_load(self,folder_path): #move to patches_handler
-
-		print(folder_path)
-		#paths=glob.glob(paths_npy)
-		paths=list(folder_path.glob('*.npy'))
-
+		paths=glob.glob(folder_path+'*.npy')
 		files=[]
 		deb.prints(len(paths))
-		
 		for path in paths:
 			#print(path)
 			files.append(np.load(path))
@@ -2310,12 +2305,15 @@ class NetModel(NetObject):
 		print("Test count,unique",count,unique)
 		
 		#==================== ESTIMATE BATCH NUMBER===============================#
+		#prediction_dtype=np.float32
+		prediction_dtype=np.int16
+
 		batch = {'train': {}, 'test': {}, 'val':{}}
 		self.batch['train']['n'] = data.patches['train']['in'].shape[0] // self.batch['train']['size']
 		self.batch['test']['n'] = data.patches['test']['in'].shape[0] // self.batch['test']['size']
 		self.batch['val']['n'] = data.patches['val']['in'].shape[0] // self.batch['val']['size']
 
-		data.patches['test']['prediction']=np.zeros_like(data.patches['test']['label'][:,:,:,:,:-1], dtype=np.float32)
+		data.patches['test']['prediction']=np.zeros_like(data.patches['test']['label'][:,:,:,:,:-1], dtype=np.float16)
 		deb.prints(data.patches['test']['label'].shape)
 		deb.prints(self.batch['test']['n'])
 		
@@ -2362,7 +2360,6 @@ class NetModel(NetObject):
 			self.train_predict=True
 			#pdb.set_trace()
 			#if self.train_predict:
-			prediction_dtype=np.float32
 
             
 			#================== VAL LOOP=====================#
@@ -2718,7 +2715,7 @@ if __name__ == '__main__':
 		deb.prints(data.patches['val']['label'].shape)
 		model.loss_weights=np.load(data.path_patches_bckndfixed+'loss_weights.npy')
 
-	store_patches=False
+	store_patches=True
 	store_patches_each_sample=False
 	if store_patches==True and store_patches_each_sample==True:
 		patchesStorageEachSample = PatchesStorageEachSample(data.path['v'])

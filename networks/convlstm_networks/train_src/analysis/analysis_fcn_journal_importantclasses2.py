@@ -578,7 +578,12 @@ if dataset=='cv':
 			'model_best_Unet3D_adam_focal3.h5',
 			'model_best_Unet3D_adam_focal4.h5']]
 	elif exp_id==5:
-		experiment_groups=[['model_best_BUnet4ConvLSTM_windows_test.h5']]
+		#experiment_groups=[['model_best_BUnet4ConvLSTM_windows_test.h5']]
+		experiment_groups=[['model_best_BUnet4ConvLSTM_float32.h5',
+			'model_best_BUnet4ConvLSTM_int16.h5',
+			'model_best_BUnet4ConvLSTM_windows_test.h5']]
+
+		
 elif dataset=='lm':
 
 	experiment_groups=[[
