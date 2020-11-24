@@ -2306,14 +2306,15 @@ class NetModel(NetObject):
 		
 		#==================== ESTIMATE BATCH NUMBER===============================#
 		#prediction_dtype=np.float32
-		prediction_dtype=np.int16
+#		prediction_dtype=np.int16
+		prediction_dtype=np.int8
 
 		batch = {'train': {}, 'test': {}, 'val':{}}
 		self.batch['train']['n'] = data.patches['train']['in'].shape[0] // self.batch['train']['size']
 		self.batch['test']['n'] = data.patches['test']['in'].shape[0] // self.batch['test']['size']
 		self.batch['val']['n'] = data.patches['val']['in'].shape[0] // self.batch['val']['size']
 
-		data.patches['test']['prediction']=np.zeros_like(data.patches['test']['label'][:,:,:,:,:-1], dtype=np.float16)
+		data.patches['test']['prediction']=np.zeros_like(data.patches['test']['label'][:,:,:,:,:-1], dtype=prediction_dtype)
 		deb.prints(data.patches['test']['label'].shape)
 		deb.prints(self.batch['test']['n'])
 		

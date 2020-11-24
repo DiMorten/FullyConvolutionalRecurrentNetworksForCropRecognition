@@ -121,7 +121,7 @@ elif dataset=='cv':
                    [45, 150, 255]])
 
 print("Loading patch locations...")
-order_id_load=True
+order_id_load=False
 if order_id_load==False:
 	order_id=patch_file_id_order_from_folder(folder_load_path)
 	np.save('order_id.npy',order_id)

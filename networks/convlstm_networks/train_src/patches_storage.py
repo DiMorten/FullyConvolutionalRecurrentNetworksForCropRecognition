@@ -35,7 +35,6 @@ class PatchesStorageAllSamples(PatchesStorage):
 	def storeSplit(self, patches, split='train_bckndfixed'):
 		pathlib.Path(self.path[split]).mkdir(parents=True, exist_ok=True) 
 		print("Storing in ",self.path[split])
-		pdb.set_trace()
 		np.save(self.path[split]+'patches_in.npy', patches['in']) #to-do: add polymorphism for other types of input 
 		
 		#pathlib.Path(self.path[split]['label']).mkdir(parents=True, exist_ok=True) 
