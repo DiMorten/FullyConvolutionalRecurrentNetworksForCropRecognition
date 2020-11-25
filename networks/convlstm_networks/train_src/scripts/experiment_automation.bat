@@ -7,7 +7,7 @@ set dataSource=%4
 
 echo %dataset%
 echo 'cv' 
-IF %dataset%=='cv' (
+IF %dataset%==cv (
 	set filename=campo_verde
 	set results_path=../results/convlstm_results/model/cv/
 	set summary_save_path=../results/convlstm_results/summary/cv/
@@ -23,7 +23,7 @@ IF %dataset%=='cv' (
 	set sequence_len=13
 	::sequence_len=11
 	set class_n=15 
-    IF %dataSource%=='SARH' (
+    IF %dataSource%==SARH (
 		set channel_n=3
 		set results_path=../results/convlstm_results/model/lm_sarh/
 		set summary_save_path=../results/convlstm_results/summary/lm_sarh/

@@ -14,7 +14,7 @@ import glob
 import sys
 import pickle
 import argparse
-
+import colorama
 # Local
 import utils
 import deb
@@ -22,6 +22,7 @@ from model import (conv_lstm,Conv3DMultitemp,UNet,SMCNN,SMCNNlstm, SMCNN_UNet, S
 
 from dataSource import DataSource, SARSource, OpticalSource, Dataset, LEM, CampoVerde, OpticalSourceWithClouds,SARHSource
 
+colorama.init()
 #Input configuration
 parser = argparse.ArgumentParser(description='')
 parser.add_argument('--dataset_name', dest='dataset_name', default='cv', help='Dataset codename. cv or lm')
@@ -75,7 +76,8 @@ else:
     label_type='one_hot'
 deb.prints(label_type)
 deb.prints(args.patches_save)
-
+deb.prints(args.dataset_name)
+deb.prints('cv')
 if args.dataset_name=='cv':
     dataset=CampoVerde()
 elif args.dataset_name=='lm':

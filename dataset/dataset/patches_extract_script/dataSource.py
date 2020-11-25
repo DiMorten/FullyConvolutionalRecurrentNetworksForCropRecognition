@@ -195,12 +195,13 @@ class OpticalSourceWithClouds(OpticalSource):
 		self.name='OpticalSourceWithClouds'
 
 class Dataset(object):
-	def __init__(self,path,im_h,im_w,class_n,class_list):
+	def __init__(self,path,im_h,im_w,class_n,class_list,name):
 		self.path=Path(path)
 		self.class_n=class_n
 		self.im_h=im_h
 		self.im_w=im_w
 		self.class_list=class_list
+		self.name=name
 	@abstractmethod
 	def addDataSource(self,dataSource):
 		pass
@@ -251,12 +252,13 @@ class Dataset(object):
 		return self.dataSource.channelsToMask
 class CampoVerde(Dataset):
 	def __init__(self):
+		name='cv'
 		path="../cv_data/"
 		class_n=13
 		im_h=8492
 		im_w=7995
 		class_list = ['Background','Soybean','Maize','Cotton','Sorghum','Beans','NCC','Pasture','Eucaplyptus','Soil','Turfgrass','Cerrado']
-		super().__init__(path,im_h,im_w,class_n,class_list)
+		super().__init__(path,im_h,im_w,class_n,class_list,name)
 
 	def addDataSource(self,dataSource):
 		self.dataSource = dataSource
@@ -269,13 +271,14 @@ class CampoVerde(Dataset):
 		self.t_len=len(self.im_list)
 class LEM(Dataset):
 	def __init__(self):
+		name='lm'
 		path="../lm_data/"
 		class_n=15
 		im_w=8658
 		im_h=8484
 		class_list = ['Background','Soybean','Maize','Cotton','Coffee','Beans','Sorghum','Millet','Eucalyptus','Pasture/Grass','Hay','Cerrado','Conversion Area','Soil','Not Identified']
 
-		super().__init__(path,im_h,im_w,class_n,class_list)
+		super().__init__(path,im_h,im_w,class_n,class_list,name)
 
 	def addDataSource(self,dataSource):
 		deb.prints(dataSource.name)

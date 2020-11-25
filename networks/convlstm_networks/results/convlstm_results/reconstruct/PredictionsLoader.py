@@ -45,4 +45,4 @@ class PredictionsLoaderModel(PredictionsLoader):
 		print(test_in.shape, test_label.shape, test_predictions.shape)
 		print("Test predictions dtype",test_predictions.dtype)
 		del test_in
-		return test_predictions, test_label
+		return test_predictions, test_label, model
