@@ -2305,8 +2305,8 @@ class NetModel(NetObject):
 		print("Test count,unique",count,unique)
 		
 		#==================== ESTIMATE BATCH NUMBER===============================#
-		#prediction_dtype=np.float32
-		prediction_dtype=np.int16
+		prediction_dtype=np.float32
+		#prediction_dtype=np.int16
 #		prediction_dtype=np.int8
 
 		batch = {'train': {}, 'test': {}, 'val':{}}
@@ -2381,8 +2381,8 @@ class NetModel(NetObject):
 							batch['val']['in'].astype(np.float32), 
 							np.expand_dims(batch['val']['label'].argmax(axis=4),axis=4).astype(np.int8))		# Accumulated epoch
 
-					data.patches['val']['prediction'][idx0:idx1]=self.graph.predict(
-						batch['val']['in'].astype(np.float32),batch_size=self.batch['val']['size'])*13.astype(prediction_dtype)
+					data.patches['val']['prediction'][idx0:idx1]=(self.graph.predict(
+						batch['val']['in'].astype(np.float32),batch_size=self.batch['val']['size'])*13).astype(prediction_dtype)
 				self.metrics['val']['loss'] /= self.batch['val']['n']
 
 				metrics_val=data.metrics_get(data.patches['val']['prediction'],data.patches['val']['label'],debug=2)
@@ -2442,8 +2442,8 @@ class NetModel(NetObject):
 							batch['test']['in'].astype(np.float32), 
 							np.expand_dims(batch['test']['label'].argmax(axis=4),axis=4).astype(np.int16))		# Accumulated epoch
 
-					data.patches['test']['prediction'][idx0:idx1]=self.graph.predict(
-						batch['test']['in'].astype(np.float32),batch_size=self.batch['test']['size'])*13.astype(prediction_dtype)
+					data.patches['test']['prediction'][idx0:idx1]=(self.graph.predict(
+						batch['test']['in'].astype(np.float32),batch_size=self.batch['test']['size'])*13).astype(prediction_dtype)
 			#====================METRICS GET================================================#
 			deb.prints(data.patches['test']['label'].shape)	
 			deb.prints(data.patches['test']['prediction'].dtype)
@@ -2716,6 +2716,9 @@ if __name__ == '__main__':
 		deb.prints(data.patches['val']['label'].shape)
 		model.loss_weights=np.load(data.path_patches_bckndfixed+'loss_weights.npy')
 
+		model.loss_weights_ones=model.loss_weights.copy() # all weights are 1
+		model.loss_weights_ones[:]=1
+
 	store_patches=True
 	store_patches_each_sample=False
 	if store_patches==True and store_patches_each_sample==True:
@@ -2736,6 +2739,7 @@ if __name__ == '__main__':
 		print("===== STORING THE LOADED PATCHES AS ALL SAMPLES IN A SINGLE FILE ======")
 		
 		patchesStorage.store(data.patches)
+		print("===== PATCHES WERE STORED ======")
 
 
 	deb.prints(data.patches['train']['label'].shape)

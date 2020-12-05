@@ -136,3 +136,4 @@ dmypy.json
 *.txt
 *metadata.txt
 *summary*
+*.rar

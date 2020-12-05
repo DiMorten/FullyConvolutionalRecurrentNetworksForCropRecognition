@@ -340,14 +340,14 @@ class DataForNet(object):
 		deb.prints(self.conf["train"]["mask"]["dir"])
 		
 		print("#========================== STORE FULL MASKED NORMALIZED IMAGES ===============#")
-		store_full_masked_normalized=True
+		store_full_masked_normalized=False
 		if store_full_masked_normalized==True:
-			np.save(self.dataset.name+'_full_ims_test.npy',self.full_ims_test.astype(np.float16))
-			np.save(self.dataset.name+'_full_ims_train.npy',self.full_ims_train.astype(np.float16))
-			np.save(self.dataset.name+'_full_label_test.npy',self.full_label_test)
-			np.save(self.dataset.name+'_full_label_train.npy',self.full_label_train)
+			np.save('full_ims_test.npy',self.full_ims_test)
+			np.save('full_ims_train.npy',self.full_ims_train)
+			np.save('full_label_test.npy',self.full_label_test)
+			np.save('full_label_train.npy',self.full_label_train)
 			
-		pdb.set_trace()
+		#pdb.set_trace()
 		#========================== BEGIN PATCH EXTRACTION ============================#
 		view_as_windows_flag=False
 		if view_as_windows_flag==True:

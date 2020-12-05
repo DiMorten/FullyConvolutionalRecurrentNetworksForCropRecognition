@@ -111,7 +111,7 @@ class SARHSource(SARSource): #SAR+Humidity
 		
 	def im_load(self,filename,conf):
 		im_out=np.load(filename)
-		humidity_filename=conf['path']/('humidity/'+filename[18:26]+'_humidity.npy')
+		humidity_filename=conf['path']/('humidity/'+str(filename)[18:26]+'_humidity.npy')
 		deb.prints(humidity_filename)
 		#pdb.set_trace()
 		humidity_im=np.expand_dims(np.load(humidity_filename).astype(np.uint8),axis=-1)
