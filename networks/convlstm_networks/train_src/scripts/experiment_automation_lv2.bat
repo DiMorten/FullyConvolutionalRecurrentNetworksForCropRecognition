@@ -16,7 +16,7 @@ set dataset=lm
 set dataSource=SAR
 set model=BUnet4ConvLSTM
 :: ==== EXTRACT PATCHES
-call patches_extract.bat %dataset% %dataSource%
+:: call patches_extract.bat %dataset% %dataSource%
 call experiment_automation.bat %id% %model% %dataset% %dataSource%
 :: ===== USE MODEL
 ::. experiment_automation.sh $id 'BUnet4ConvLSTM_SkipLSTM' $dataset
