@@ -21,6 +21,7 @@ IF %dataset%==cv (
 	set summary_save_path=../results/convlstm_results/summary/lm/
 	set dataset_path=../../../dataset/dataset/lm_data/
 	set sequence_len=13
+
 	::sequence_len=11
 	set class_n=15 
     IF %dataSource%==SARH (
@@ -81,13 +82,13 @@ set word=\
 call set results_path=%%results_path:/=%word%%%
 echo %results_path%model_best_%model%_%id%.h5 
 
-xcopy model_best.h5 %results_path%model_best_%model%_%id%.h5 /f /y
+echo F|xcopy model_best.h5 %results_path%model_best_%model%_%id%.h5 /f /y
  
 
 set word=\
 call set summary_save_path=%%summary_save_path:/=%word%%%
 echo %summary_save_path%summary_%model%_%id%.txt
 
-xcopy model_summary.txt %summary_save_path%summary_%model%_%id%.txt /f /y
+echo F|xcopy model_summary.txt %summary_save_path%summary_%model%_%id%.txt /f /y
 cd scripts
 

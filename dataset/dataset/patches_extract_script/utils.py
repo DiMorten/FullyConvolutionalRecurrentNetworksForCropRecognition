@@ -347,7 +347,7 @@ class DataForNet(object):
 			np.save(self.dataset.name+'_full_label_test.npy',self.full_label_test)
 			np.save(self.dataset.name+'_full_label_train.npy',self.full_label_train)
 			
-		pdb.set_trace()
+		#pdb.set_trace()
 		#========================== BEGIN PATCH EXTRACTION ============================#
 		view_as_windows_flag=False
 		if view_as_windows_flag==True:

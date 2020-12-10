@@ -382,6 +382,8 @@ def experiments_plot(metrics,experiment_list,dataset,
 			xlim=[-0.5,13] 
 			ylim=[10,85]
 			xticklabels=['Jun','Jul','Aug','Sep','Oct','Nov','Dec','Jan','Feb','Mar','Apr','May','Jun']
+#			xticklabels=['Jul','Aug','Sep','Oct','Nov','Dec','Jan','Feb','Mar','Apr','May','Jun']
+
 			ax.set_xlim(xlim[0],xlim[1])
 			ax3.set_xlim(xlim[0],xlim[1])
 			ax.set_ylim(75,100)
@@ -516,8 +518,8 @@ def experiments_plot(metrics,experiment_list,dataset,
 	plt.show()
 
 #dataset='lm_optical_clouds'
-#dataset='lm'
-dataset='cv'
+dataset='lm'
+#dataset='cv'
 #dataset='lm_sarh'
 
 load_metrics=False
@@ -721,7 +723,27 @@ elif dataset=='lm':
 			'model_best_BUnet4ConvLSTM_skip2.h5'
 			'model_best_BUnet4ConvLSTM_3d2.h5'
 		]]
-		
+		experiment_groups=[[
+			'model_best_BUnet4ConvLSTM_lem_baseline_adam_focal_alldates.h5'
+		]]		
+		experiment_groups=[[
+			'model_best_BUnet4ConvLSTM_lem_baseline_adam_focal_lessonedate1.h5',
+			'model_best_BUnet4ConvLSTM_lem_baseline_adam_focal_lessonedate2.h5',
+			'model_best_BUnet4ConvLSTM_lem_baseline_adam_focal_lessonedate3.h5',
+			'model_best_BUnet4ConvLSTM_lem_baseline_adam_focal_lessonedate4.h5',
+			'model_best_BUnet4ConvLSTM_lem_baseline_adam_focal_lessonedate5.h5',
+			
+		]]
+		'''		
+		experiment_groups=[[
+			'model_best_BUnet4ConvLSTM_lem_baseline_adam_focal_lessonedate1.h5'],
+			['model_best_BUnet4ConvLSTM_lem_baseline_adam_focal_lessonedate2.h5'],
+			['model_best_BUnet4ConvLSTM_lem_baseline_adam_focal_lessonedate3.h5'],
+			['model_best_BUnet4ConvLSTM_lem_baseline_adam_focal_lessonedate4.h5'],
+			['model_best_BUnet4ConvLSTM_lem_baseline_adam_focal_lessonedate5.h5']
+			
+		]		
+		'''
 elif dataset=='lm_optical':
 	exp_id=1
 	experiment_groups=[[
