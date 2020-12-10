@@ -954,8 +954,17 @@ class NetModel(NetObject):
 			x = BatchNormalization(gamma_regularizer=l2(weight_decay),
 							   beta_regularizer=l2(weight_decay))(x)
 			x = Activation('relu')(x)
-			return x		
-		def transpose_layer(x,filter_size,dilation_rate=1, 
+			return x
+		def dilated_layer_3D(x,filter_size,dilation_rate=1, kernel_size=3):
+			if isinstance(dilation_rate, int):
+				dilation_rate = (dilation_rate, dilation_rate, dilation_rate)
+			x = Conv3D(filter_size, kernel_size, padding='same',
+				dilation_rate=dilation_rate)(x)
+			x = BatchNormalization(gamma_regularizer=l2(weight_decay),
+							   beta_regularizer=l2(weight_decay))(x)
+			x = Activation('relu')(x)
+			return x
+		def transpose_layer(x,filter_size,dilation_rate=1,
 			kernel_size=3, strides=(2,2)):
 			x = TimeDistributed(Conv2DTranspose(filter_size, 
 				kernel_size, strides=strides, padding='same'))(x)
@@ -963,13 +972,7 @@ class NetModel(NetObject):
 												beta_regularizer=l2(weight_decay))(x)
 			x = Activation('relu')(x)
 			return x	
-		def dilated_layer_3D(x,filter_size,dilation_rate=1, kernel_size=3):
-			x = Conv3D(filter_size, kernel_size, padding='same',
-				dilation_rate=(dilation_rate, dilation_rate, dilation_rate))(x)
-			x = BatchNormalization(gamma_regularizer=l2(weight_decay),
-							  beta_regularizer=l2(weight_decay))(x)
-			x = Activation('relu')(x)
-			return x
+
 		def transpose_layer_3D(x,filter_size,dilation_rate=1,
 			kernel_size=3, strides=(1,2,2)):
 			x = Conv3DTranspose(filter_size,
@@ -1024,6 +1027,51 @@ class NetModel(NetObject):
 			out = keras.layers.concatenate(x, axis=4)
 			return out
 
+		def spatial_pyramid_pooling_3D(in_im,filter_size,
+			max_rate=8,global_average_pooling=False):
+			x=[]
+			if max_rate>=1:
+				x.append(dilated_layer_3D(in_im,filter_size,1))
+			if max_rate>=2:
+				x.append(dilated_layer_3D(in_im,filter_size,(1,2,2))) #6
+			if max_rate>=4:
+				x.append(dilated_layer_3D(in_im,filter_size,(2,4,4))) #12
+			if max_rate>=8:
+				x.append(dilated_layer_3D(in_im,filter_size,(4,8,8))) #18
+			if global_average_pooling==True:
+				x.append(im_pooling_layer(in_im,filter_size))
+			out = keras.layers.concatenate(x, axis=4)
+			return out
+
+		def temporal_pyramid_pooling(in_im,filter_size,
+			max_rate=4):
+			x=[]
+			if max_rate>=1:
+				x.append(dilated_layer_3D(in_im,filter_size,1))
+			if max_rate>=2:
+				x.append(dilated_layer_3D(in_im,filter_size,(2,1,1))) #2
+			if max_rate>=3:
+				x.append(dilated_layer_3D(in_im,filter_size,(3,1,1))) #2
+			if max_rate>=4:
+				x.append(dilated_layer_3D(in_im,filter_size,(4,1,1))) #4
+			if max_rate>=5:
+				x.append(dilated_layer_3D(in_im,filter_size,(5,1,1))) #4
+			out = keras.layers.concatenate(x, axis=4)
+			return out
+
+		def full_pyramid_pooling(in_im,filter_size,
+			max_rate=4):
+			x=[]
+			if max_rate>=1:
+				x.append(dilated_layer_3D(in_im,filter_size,1))
+			if max_rate>=2:
+				x.append(dilated_layer_3D(in_im,filter_size,(2,2,2))) #2
+			if max_rate>=3:
+				x.append(dilated_layer_3D(in_im,filter_size,(3,3,3))) #2
+			if max_rate>=4:
+				x.append(dilated_layer_3D(in_im,filter_size,(4,4,4))) #4
+			out = keras.layers.concatenate(x, axis=4)
+			return out
 
 		if self.model_type=='DenseNet':
 
@@ -1555,6 +1603,40 @@ class NetModel(NetObject):
 			self.graph = Model(in_im, out)
 			print(self.graph.summary())
 
+		if self.model_type=='BUnet4ConvLSTM_SkipLSTM':
+			#fs=32
+			fs=16
+
+			p1=dilated_layer(in_im,fs)
+			p1=dilated_layer(p1,fs)
+			x_p1 = Bidirectional(ConvLSTM2D(64,3,return_sequences=True,
+					padding="same"),merge_mode='concat')(p1)
+			e1 = TimeDistributed(AveragePooling2D((2, 2), strides=(2, 2)))(p1)
+			p2=dilated_layer(e1,fs*2)
+			x_p2 = Bidirectional(ConvLSTM2D(64,3,return_sequences=True,
+					padding="same"),merge_mode='concat')(p2)
+			e2 = TimeDistributed(AveragePooling2D((2, 2), strides=(2, 2)))(p2)
+			p3=dilated_layer(e2,fs*4)
+			x_p3 = Bidirectional(ConvLSTM2D(64,3,return_sequences=True,
+					padding="same"),merge_mode='concat')(p3)
+			e3 = TimeDistributed(AveragePooling2D((2, 2), strides=(2, 2)))(p3)
+
+			x = Bidirectional(ConvLSTM2D(64,3,return_sequences=True,
+					padding="same"),merge_mode='concat')(e3)
+
+			d3 = transpose_layer(x,fs*4)
+			d3 = keras.layers.concatenate([d3, x_p3], axis=4)
+			d3 = dilated_layer(d3,fs*4)
+			d2 = transpose_layer(d3,fs*2)
+			d2 = keras.layers.concatenate([d2, x_p2], axis=4)
+			d2 = dilated_layer(d2,fs*2)
+			d1 = transpose_layer(d2,fs)
+			d1 = keras.layers.concatenate([d1, x_p1], axis=4)
+			out = dilated_layer(d1,fs)
+			out = TimeDistributed(Conv2D(self.class_n, (1, 1), activation=None,
+										padding='same'))(out)
+			self.graph = Model(in_im, out)
+			print(self.graph.summary())
 		if self.model_type=='BUnet6ConvLSTM':
 
 
@@ -1844,6 +1926,84 @@ class NetModel(NetObject):
 										padding='same'))(out)
 			self.graph = Model(in_im, out)
 			print(self.graph.summary())
+		if self.model_type=='Unet3D':
+			fs=32
+			#fs=16
+
+			p1=dilated_layer_3D(in_im,fs,kernel_size=(7,3,3))
+			e1 = AveragePooling3D((1, 2, 2), strides=(1, 2, 2))(p1)
+			p2=dilated_layer_3D(e1,fs*2,kernel_size=(7,3,3))
+			e2 = AveragePooling3D((1, 2, 2), strides=(1, 2, 2))(p2)
+			p3=dilated_layer_3D(e2,fs*4,kernel_size=(7,3,3))
+			e3 = AveragePooling3D((1, 2, 2), strides=(1, 2, 2))(p3)
+
+			d3 = transpose_layer_3D(e3,fs*4)
+			d3 = keras.layers.concatenate([d3, p3], axis=4)
+			d3 = dilated_layer_3D(d3,fs*4,kernel_size=(7,3,3))
+			d2 = transpose_layer_3D(d3,fs*2)
+			d2 = keras.layers.concatenate([d2, p2], axis=4)
+			d2 = dilated_layer_3D(d2,fs*2,kernel_size=(7,3,3))
+			d1 = transpose_layer_3D(d2,fs)
+			d1 = keras.layers.concatenate([d1, p1], axis=4)
+			out = dilated_layer_3D(d1,fs,kernel_size=(7,3,3))
+			out = Conv3D(self.class_n, (1, 1, 1), activation=None,
+										padding='same')(out)
+			self.graph = Model(in_im, out)
+			print(self.graph.summary())
+
+		if self.model_type=='Unet3D_ATPP':
+			fs=16
+			max_rate=5
+			#fs=16
+
+			p1=temporal_pyramid_pooling(in_im,fs,max_rate)
+			e1 = AveragePooling3D((1, 2, 2), strides=(1, 2, 2))(p1)
+			p2=temporal_pyramid_pooling(e1,fs*2,max_rate)
+			e2 = AveragePooling3D((1, 2, 2), strides=(1, 2, 2))(p2)
+			p3=temporal_pyramid_pooling(e2,fs*4,max_rate)
+			e3 = AveragePooling3D((1, 2, 2), strides=(1, 2, 2))(p3)
+
+			d3 = transpose_layer_3D(e3,fs*4)
+			d3 = keras.layers.concatenate([d3, p3], axis=4)
+			d3 = temporal_pyramid_pooling(d3,fs*4,max_rate)
+			d2 = transpose_layer_3D(d3,fs*2)
+			d2 = keras.layers.concatenate([d2, p2], axis=4)
+			d3 = temporal_pyramid_pooling(d2,fs*2,max_rate)
+			d1 = transpose_layer_3D(d2,fs)
+			d1 = keras.layers.concatenate([d1, p1], axis=4)
+			out = temporal_pyramid_pooling(d1,fs,max_rate)
+			out = Conv3D(self.class_n, (1, 1, 1), activation=None,
+										padding='same')(out)
+			self.graph = Model(in_im, out)
+			print(self.graph.summary())
+
+		if self.model_type=='Unet3D_AFPP':
+			fs=16
+			max_rate=4
+			#fs=16
+
+			p1=full_pyramid_pooling(in_im,fs,max_rate)
+			e1 = AveragePooling3D((1, 2, 2), strides=(1, 2, 2))(p1)
+			p2=full_pyramid_pooling(e1,fs*2,max_rate)
+			e2 = AveragePooling3D((1, 2, 2), strides=(1, 2, 2))(p2)
+			p3=full_pyramid_pooling(e2,fs*4,max_rate)
+			e3 = AveragePooling3D((1, 2, 2), strides=(1, 2, 2))(p3)
+
+			d3 = transpose_layer_3D(e3,fs*4)
+			d3 = keras.layers.concatenate([d3, p3], axis=4)
+			d3 = full_pyramid_pooling(d3,fs*4,max_rate)
+			d2 = transpose_layer_3D(d3,fs*2)
+			d2 = keras.layers.concatenate([d2, p2], axis=4)
+			d3 = full_pyramid_pooling(d2,fs*2,max_rate)
+			d1 = transpose_layer_3D(d2,fs)
+			d1 = keras.layers.concatenate([d1, p1], axis=4)
+			out = full_pyramid_pooling(d1,fs,max_rate)
+			out = Conv3D(self.class_n, (1, 1, 1), activation=None,
+										padding='same')(out)
+			self.graph = Model(in_im, out)
+			print(self.graph.summary())
+
+
 # ==================================== ATTENTION ATTEMPTS =================================== #
 		elif self.model_type=='ConvLSTM_seq2seq_bi_attention':
 #			out = TimeDistributed(Conv2D(self.class_n, (1, 1), activation='softmax',
@@ -2072,70 +2232,7 @@ class NetModel(NetObject):
 
 			self.graph = Model(in_im, out)
 			print(self.graph.summary())
-		
 
-
-
-
-		if self.model_type=='Unet3D':
-			#fs=32
-			#fs=16
-			fs=64
-
-			p1=dilated_layer_3D(in_im,fs)
-			e1 = AveragePooling3D((1, 2, 2), strides=(1, 2, 2))(p1)
-			p2=dilated_layer_3D(e1,fs*2)
-			e2 = AveragePooling3D((1, 2, 2), strides=(1, 2, 2))(p2)
-			p3=dilated_layer_3D(e2,fs*4)
-			e3 = AveragePooling3D((1, 2, 2), strides=(1, 2, 2))(p3)
-
-			d3 = transpose_layer_3D(e3,fs*4)
-			d3 = keras.layers.concatenate([d3, p3], axis=4)
-			d3 = dilated_layer_3D(d3,fs*4)
-			d2 = transpose_layer_3D(d3,fs*2)
-			d2 = keras.layers.concatenate([d2, p2], axis=4)
-			d2 = dilated_layer_3D(d2,fs*2)
-			d1 = transpose_layer_3D(d2,fs)
-			d1 = keras.layers.concatenate([d1, p1], axis=4)
-			out = dilated_layer_3D(d1,fs)
-			out = Conv3D(self.class_n, (1, 1, 1), activation=None,
-										padding='same')(out)
-			self.graph = Model(in_im, out)
-			print(self.graph.summary())
-		if self.model_type=='BUnet4ConvLSTM_SkipLSTM':
-			#fs=32
-			fs=16
-
-			p1=dilated_layer(in_im,fs)
-			p1=dilated_layer(p1,fs)
-			x_p1 = Bidirectional(ConvLSTM2D(64,3,return_sequences=True,
-					padding="same"),merge_mode='concat')(p1)
-			e1 = TimeDistributed(AveragePooling2D((2, 2), strides=(2, 2)))(p1)
-			p2=dilated_layer(e1,fs*2)
-			x_p2 = Bidirectional(ConvLSTM2D(64,3,return_sequences=True,
-					padding="same"),merge_mode='concat')(p2)
-			e2 = TimeDistributed(AveragePooling2D((2, 2), strides=(2, 2)))(p2)
-			p3=dilated_layer(e2,fs*4)
-			x_p3 = Bidirectional(ConvLSTM2D(64,3,return_sequences=True,
-					padding="same"),merge_mode='concat')(p3)
-			e3 = TimeDistributed(AveragePooling2D((2, 2), strides=(2, 2)))(p3)
-
-			x = Bidirectional(ConvLSTM2D(64,3,return_sequences=True,
-					padding="same"),merge_mode='concat')(e3)
-
-			d3 = transpose_layer(x,fs*4)
-			d3 = keras.layers.concatenate([d3, x_p3], axis=4)
-			d3 = dilated_layer(d3,fs*4)
-			d2 = transpose_layer(d3,fs*2)
-			d2 = keras.layers.concatenate([d2, x_p2], axis=4)
-			d2 = dilated_layer(d2,fs*2)
-			d1 = transpose_layer(d2,fs)
-			d1 = keras.layers.concatenate([d1, x_p1], axis=4)
-			out = dilated_layer(d1,fs)
-			out = TimeDistributed(Conv2D(self.class_n, (1, 1), activation=None,
-										padding='same'))(out)
-			self.graph = Model(in_im, out)
-			print(self.graph.summary())
 		if self.model_type=='BUnet4ConvLSTM_64':
 
 

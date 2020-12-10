@@ -20,9 +20,46 @@ from PredictionsLoader import PredictionsLoaderNPY, PredictionsLoaderModel
 
 save_bar_flag=True
 #====================================
+def dense_crf(probs, img=None, n_iters=10, n_classes=19,
+			  sxy_gaussian=(1, 1), compat_gaussian=4,
+			  sxy_bilateral=(49, 49), compat_bilateral=5,
+			  srgb_bilateral=(13, 13, 13)):
+	import pydensecrf.densecrf as dcrf
+	from pydensecrf.utils import create_pairwise_bilateral
+	_, h, w, _ = probs.shape
+
+	probs = probs[0].transpose(2, 0, 1).copy(order='C')	 # Need a contiguous array.
+
+	d = dcrf.DenseCRF2D(w, h, n_classes)  # Define DenseCRF model.
+	U = -np.log(probs)	# Unary potential.
+	U = U.reshape((n_classes, -1))	# Needs to be flat.
+	d.setUnaryEnergy(U)
+	d.addPairwiseGaussian(sxy=sxy_gaussian, compat=compat_gaussian,
+						  kernel=dcrf.DIAG_KERNEL, normalization=dcrf.NORMALIZE_SYMMETRIC)
+	if img is not None:
+		assert (img.shape[1:3] == (h, w)), "The image height and width must coincide with dimensions of the logits."
+		pairwise_bilateral = create_pairwise_bilateral(sdims=(10,10), schan=(0.01), img=img[0], chdim=2)
+		d.addPairwiseEnergy(pairwise_bilateral, compat=10)
+
+	Q = d.inference(n_iters)
+	preds = np.array(Q, dtype=np.float32).reshape((n_classes, h, w)).transpose(1, 2, 0)
+	return np.expand_dims(preds, 0)
+
+
 def labels_predictions_filter_transform(label_test,predictions,class_n,
 		debug=1,small_classes_ignore=True,
-		important_classes=None,dataset='cv'):
+		important_classes=None,dataset='cv',skip_crf=False,t=None):
+
+	if not skip_crf:
+		# CRF
+		for i,v in enumerate(predictions):
+			img_in = imgs_in[i][t]
+			img_in = np.array(img_in, dtype=np.uint8)
+			img_in = np.expand_dims(img_in, axis=0)
+			v = scipy.special.softmax(v, axis=-1)
+			v = np.expand_dims(v, axis=0)
+			predictions[i] = dense_crf(v,img=img_in,n_iters=10,sxy_gaussian=(3, 3), compat_gaussian=3,n_classes=class_n)
+
 	predictions=predictions.argmax(axis=np.ndim(predictions)-1)
 	predictions=np.reshape(predictions,-1)
 	label_test=label_test.argmax(axis=np.ndim(label_test)-1)
@@ -155,7 +192,7 @@ def metrics_get(label_test,predictions,only_basics=False,debug=1, detailed_t=Non
 # =========seq2seq 
 def experiment_analyze(small_classes_ignore,dataset='cv',
 		prediction_filename='prediction_DenseNetTimeDistributed_blockgoer.npy',
-		prediction_type='npy', mode='each_date',debug=1):
+		prediction_type='npy', mode='each_date',debug=1,model_n=0):
 	#path='/home/lvc/Jorg/igarss/convrnn_remote_sensing/results/seq2seq_ignorelabel/'+dataset+'/'
 	base_path="../../results/convlstm_results/"
 	path=base_path+dataset+'/'
@@ -207,11 +244,15 @@ def experiment_analyze(small_classes_ignore,dataset='cv',
 		for t in range(label_test.shape[1]):
 			predictions_t = predictions[:,t,:,:,:]
 			label_test_t = label_test[:,t,:,:,:]
+			skip_crf = model_n<2 #prediction_filename.startswith('model_best_BUnet4ConvLSTM_128fl_')
+			print("###skip_crf###")
+			print(skip_crf)
+			print(prediction_filename)
 
 			label_test_t,predictions_t = labels_predictions_filter_transform(
 				label_test_t, predictions_t, class_n=class_n,
 				debug=debug,small_classes_ignore=small_classes_ignore,
-				important_classes=None)
+				important_classes=None, dataset=dataset, skip_crf=skip_crf, t=t)
 			metrics = metrics_get(label_test_t, predictions_t,
 				only_basics=True, debug=debug, detailed_t = t)	
 			metrics_t['f1_score'].append(metrics['f1_score'])
@@ -250,7 +291,9 @@ def experiment_groups_analyze(dataset,experiment_group,
 		experiment_metrics=[]
 		for group in experiment_group:
 			group_metrics=[]
-			for experiment in group:
+			for i,experiment in enumerate(group):
+				print("Starting experiment:",experiment)
+
 				print("======determining prediction type")
 
 				if experiment[-3:]=='npy':
@@ -264,7 +307,7 @@ def experiment_groups_analyze(dataset,experiment_group,
 				group_metrics.append(experiment_analyze(
 					dataset=dataset,
 					prediction_filename=experiment,
-					mode=mode,debug=0,
+					mode=mode,debug=0,model_n=i,
 					small_classes_ignore=small_classes_ignore,
 					prediction_type=prediction_type))
 			experiment_metrics.append(group_metrics)
