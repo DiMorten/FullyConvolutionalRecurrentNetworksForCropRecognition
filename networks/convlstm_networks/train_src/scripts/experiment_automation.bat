@@ -16,7 +16,7 @@ IF %dataset%==cv (
 	set class_n=12
 	set channel_n=2
 ) ELSE (
-	set filename='lm'
+	set filename=lm
 	set results_path=../results/convlstm_results/model/lm/
 	set summary_save_path=../results/convlstm_results/summary/lm/
 	set dataset_path=../../../dataset/dataset/lm_data/

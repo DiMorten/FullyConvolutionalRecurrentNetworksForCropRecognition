@@ -340,7 +340,7 @@ class DataForNet(object):
 		deb.prints(self.conf["train"]["mask"]["dir"])
 		
 		print("#========================== STORE FULL MASKED NORMALIZED IMAGES ===============#")
-		store_full_masked_normalized=True
+		store_full_masked_normalized=False
 		if store_full_masked_normalized==True:
 			np.save(self.dataset.name+'_full_ims_test.npy',self.full_ims_test.astype(np.float16))
 			np.save(self.dataset.name+'_full_ims_train.npy',self.full_ims_train.astype(np.float16))

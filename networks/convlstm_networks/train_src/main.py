@@ -2305,8 +2305,8 @@ class NetModel(NetObject):
 		print("Test count,unique",count,unique)
 		
 		#==================== ESTIMATE BATCH NUMBER===============================#
-		#prediction_dtype=np.float32
-		prediction_dtype=np.int16
+		prediction_dtype=np.float32
+#		prediction_dtype=np.int16
 #		prediction_dtype=np.int8
 
 		batch = {'train': {}, 'test': {}, 'val':{}}
@@ -2610,9 +2610,9 @@ if __name__ == '__main__':
 
 
 	#adam = Adam(lr=0.0001, beta_1=0.9)
-	#adam = Adam(lr=0.001, beta_1=0.9)
+	adam = Adam(lr=0.001, beta_1=0.9)
 	
-	adam = Adagrad(0.01)
+	#adam = Adagrad(0.01)
 	#model = ModelLoadEachBatch(epochs=args.epochs, patch_len=args.patch_len,
 	model = NetModel(epochs=args.epochs, patch_len=args.patch_len,
 					 patch_step_train=args.patch_step_train, eval_mode=args.eval_mode,
@@ -2750,8 +2750,8 @@ if __name__ == '__main__':
 	#metrics=['accuracy',fmeasure,categorical_accuracy]
 
 
-	loss=weighted_categorical_crossentropy_ignoring_last_label(model.loss_weights_ones)
-	#loss=categorical_focal_ignoring_last_label(alpha=0.25,gamma=2)
+	#loss=weighted_categorical_crossentropy_ignoring_last_label(model.loss_weights_ones)
+	loss=categorical_focal_ignoring_last_label(alpha=0.25,gamma=2)
 	#loss=weighted_categorical_focal_ignoring_last_label(model.loss_weights,alpha=0.25,gamma=2)
 
 	model.graph.compile(loss=loss,
