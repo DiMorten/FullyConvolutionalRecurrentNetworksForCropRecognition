@@ -15,7 +15,18 @@ set dataset=lm
 set dataSource=SAR
 set model=BUnet4ConvLSTM
 :: ==== EXTRACT PATCHES
-:: call patches_extract.bat %dataset% %dataSource%
+set id=dummy
+call patches_extract.bat %dataset% %dataSource%
+:: set id=less_jun18_1
+call experiment_automation.bat %id% %model% %dataset% %dataSource%
+:: set id=less_jun18_2
+:: call experiment_automation.bat %id% %model% %dataset% %dataSource%
+:: set id=less_jun18_3
+:: call experiment_automation.bat %id% %model% %dataset% %dataSource%
+:: set id=less_jun18_4
+:: call experiment_automation.bat %id% %model% %dataset% %dataSource%
+:: set id=less_jun18_5
+:: call experiment_automation.bat %id% %model% %dataset% %dataSource%
 
 :: set id=lem_baseline_adam_focal_lessonedate1
 :: call experiment_automation.bat %id% %model% %dataset% %dataSource%
@@ -32,17 +43,17 @@ set model=BUnet4ConvLSTM
 :: set id=lem_baseline_adam_focal_lessonedate5
 :: call experiment_automation.bat %id% %model% %dataset% %dataSource%
 
-set id=lem_baseline_adam_focal_alldates2
-call experiment_automation.bat %id% %model% %dataset% %dataSource%
+:: set id=lem_baseline_adam_focal_alldates2
+:: call experiment_automation.bat %id% %model% %dataset% %dataSource%
 
-set id=lem_baseline_adam_focal_alldates3
-call experiment_automation.bat %id% %model% %dataset% %dataSource%
+:: set id=lem_baseline_adam_focal_alldates3
+:: call experiment_automation.bat %id% %model% %dataset% %dataSource%
 
-set id=lem_baseline_adam_focal_alldates4
-call experiment_automation.bat %id% %model% %dataset% %dataSource%
+:: set id=lem_baseline_adam_focal_alldates4
+:: call experiment_automation.bat %id% %model% %dataset% %dataSource%
 
-set id=lem_baseline_adam_focal_alldates5
-call experiment_automation.bat %id% %model% %dataset% %dataSource%
+:: set id=lem_baseline_adam_focal_alldates5
+:: call experiment_automation.bat %id% %model% %dataset% %dataSource%
 
 :: ===== USE MODEL
 ::. experiment_automation.sh $id 'BUnet4ConvLSTM_SkipLSTM' $dataset

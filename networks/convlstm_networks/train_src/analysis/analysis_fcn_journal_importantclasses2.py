@@ -240,11 +240,11 @@ def experiment_analyze(small_classes_ignore,dataset='cv',
 		# 			date_important_classes=[0,6,8]
 
 
-		
+		skip_crf=True
 		for t in range(label_test.shape[1]):
 			predictions_t = predictions[:,t,:,:,:]
 			label_test_t = label_test[:,t,:,:,:]
-			skip_crf = model_n<2 #prediction_filename.startswith('model_best_BUnet4ConvLSTM_128fl_')
+			#skip_crf = model_n<2 #prediction_filename.startswith('model_best_BUnet4ConvLSTM_128fl_')
 			print("###skip_crf###")
 			print(skip_crf)
 			print(prediction_filename)
@@ -768,25 +768,67 @@ elif dataset=='lm':
 		]]
 		experiment_groups=[[
 			'model_best_BUnet4ConvLSTM_lem_baseline_adam_focal_alldates.h5'
-		]]		
-		experiment_groups=[[
-			'model_best_BUnet4ConvLSTM_lem_baseline_adam_focal_lessonedate1.h5',
-			'model_best_BUnet4ConvLSTM_lem_baseline_adam_focal_lessonedate2.h5',
-			'model_best_BUnet4ConvLSTM_lem_baseline_adam_focal_lessonedate3.h5',
-			'model_best_BUnet4ConvLSTM_lem_baseline_adam_focal_lessonedate4.h5',
-			'model_best_BUnet4ConvLSTM_lem_baseline_adam_focal_lessonedate5.h5',
-			
 		]]
-		'''		
-		experiment_groups=[[
-			'model_best_BUnet4ConvLSTM_lem_baseline_adam_focal_lessonedate1.h5'],
-			['model_best_BUnet4ConvLSTM_lem_baseline_adam_focal_lessonedate2.h5'],
-			['model_best_BUnet4ConvLSTM_lem_baseline_adam_focal_lessonedate3.h5'],
-			['model_best_BUnet4ConvLSTM_lem_baseline_adam_focal_lessonedate4.h5'],
-			['model_best_BUnet4ConvLSTM_lem_baseline_adam_focal_lessonedate5.h5']
-			
-		]		
-		'''
+		#dates_mode = 'less_one'
+		dates_mode = 'less_two'
+		dates_mode = 'less_mar18'
+		
+
+# lm less one date		
+		if dates_mode=='less_one':
+			'''
+			experiment_groups=[[
+				'model_best_BUnet4ConvLSTM_lem_baseline_adam_focal_lessonedate1.h5',
+				'model_best_BUnet4ConvLSTM_lem_baseline_adam_focal_lessonedate2.h5',
+				'model_best_BUnet4ConvLSTM_lem_baseline_adam_focal_lessonedate3.h5',
+				'model_best_BUnet4ConvLSTM_lem_baseline_adam_focal_lessonedate4.h5',
+				'model_best_BUnet4ConvLSTM_lem_baseline_adam_focal_lessonedate5.h5',
+				
+			]]
+			'''		
+			experiment_groups=[[
+				'model_best_BUnet4ConvLSTM_lem_baseline_adam_focal_lessonedate1.h5'],
+				['model_best_BUnet4ConvLSTM_lem_baseline_adam_focal_lessonedate2.h5'],
+				['model_best_BUnet4ConvLSTM_lem_baseline_adam_focal_lessonedate3.h5'],
+				['model_best_BUnet4ConvLSTM_lem_baseline_adam_focal_lessonedate4.h5'],
+				['model_best_BUnet4ConvLSTM_lem_baseline_adam_focal_lessonedate5.h5']
+				
+			]	
+		elif dates_mode == 'less_two':
+			experiment_groups=[['model_best_BUnet4ConvLSTM_less_two_dates.h5']]	
+			#'''
+		elif dates_mode == 'less_mar18':
+			experiment_groups=[[
+				'model_best_BUnet4ConvLSTM_less_mar18_1.h5'],
+				['model_best_BUnet4ConvLSTM_less_mar18_2.h5'],
+				['model_best_BUnet4ConvLSTM_less_mar18_3.h5'],
+				['model_best_BUnet4ConvLSTM_less_mar18_4.h5'],
+				['model_best_BUnet4ConvLSTM_less_mar18_5.h5']
+				
+			]	
+# lm all dates
+		else:
+			'''
+			experiment_groups=[[
+				'model_best_BUnet4ConvLSTM_lem_baseline_adam_focal_alldates.h5',
+				'model_best_BUnet4ConvLSTM_lem_baseline_adam_focal_alldates2.h5',
+				'model_best_BUnet4ConvLSTM_lem_baseline_adam_focal_alldates3.h5',
+				'model_best_BUnet4ConvLSTM_lem_baseline_adam_focal_alldates4.h5',
+				'model_best_BUnet4ConvLSTM_lem_baseline_adam_focal_alldates5.h5',
+				
+			]]
+			'''		
+			experiment_groups=[[
+				'model_best_BUnet4ConvLSTM_lem_baseline_adam_focal_alldates.h5'],
+				['model_best_BUnet4ConvLSTM_lem_baseline_adam_focal_alldates2.h5'],
+				['model_best_BUnet4ConvLSTM_lem_baseline_adam_focal_alldates3.h5'],
+				['model_best_BUnet4ConvLSTM_lem_baseline_adam_focal_alldates4.h5'],
+				['model_best_BUnet4ConvLSTM_lem_baseline_adam_focal_alldates5.h5']
+				
+			]		
+			#'''
+		
+
 elif dataset=='lm_optical':
 	exp_id=1
 	experiment_groups=[[

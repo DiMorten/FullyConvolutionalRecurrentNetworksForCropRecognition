@@ -2799,7 +2799,6 @@ if __name__ == '__main__':
 			deb.prints(data.patches['train']['in'].shape)
 			deb.prints(data.patches['test']['in'].shape)
 	
-		print("================== PATCHES WERE STORED =====================")
 
 
 	else:
@@ -2827,12 +2826,15 @@ if __name__ == '__main__':
 		assert data.patches['train']['in'].all()==patchesStorageEachSample.load()['train']['in'].all()
 		assert data.patches['test']['in'].all()==patchesStorageEachSample.load()['test']['in'].all()
 		assert data.patches['val']['in'].all()==patchesStorageEachSample.load()['val']['in'].all()
+		print("================== PATCHES WERE STORED =====================")
+
 	elif store_patches==True and store_patches_each_sample==False:
 		patchesStorage = PatchesStorageAllSamples(data.path['v'])
 	
 		print("===== STORING THE LOADED PATCHES AS ALL SAMPLES IN A SINGLE FILE ======")
 		
 		patchesStorage.store(data.patches)
+		print("================== PATCHES WERE STORED =====================")
 
 
 	deb.prints(data.patches['train']['label'].shape)

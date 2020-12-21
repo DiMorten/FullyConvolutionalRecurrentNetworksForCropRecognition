@@ -93,6 +93,44 @@ class SARSource(DataSource):
 		print("FINISHED NORMALIZING, RESULT:")
 		print(np.min(im_norm),np.max(im_norm),np.average(im_norm))
 		return im_norm
+	def im_seq_normalize_hwt(self,im,mask):
+		im_check_flag=False
+		t_steps,h,w,channels=im.shape
+		#im=im.copy()
+		##im_flat=np.transpose(im,(1,2,3,0))
+		#im=np.reshape(im,(h,w,t_steps*channels))
+		im_flat=np.reshape(im,(h*w*t_steps,channels))
+		if im_check_flag==True:
+			im_check=np.reshape(im_flat,(h,w,channels,t_steps))
+			im_check=np.transpose(im_check,(3,0,1,2))
+			deb.prints(im_check.shape)
+			deb.prints(np.all(im_check==im))
+		deb.prints(im.shape)
+		# mask is (h,w). Convert to (t_step,h,w)
+		mask = np.repeat(np.expand_dims(mask,axis=0),t_steps,axis=0)
+		mask_flat=np.reshape(mask,-1)
+		#train_flat=im_flat[mask_flat==1,:]
+
+		deb.prints(im_flat[mask_flat==1,:].shape)
+		print(np.min(im_flat[mask_flat==1,:]),np.max(im_flat[mask_flat==1,:]),np.average(im_flat[mask_flat==1,:]))
+
+		scaler=StandardScaler()
+		scaler.fit(im_flat[mask_flat==1,:])
+		#train_norm_flat=scaler.transform(train_flat)
+		#del train_flat
+
+		im_norm_flat=scaler.transform(im_flat)
+		del im_flat
+		im_norm=np.reshape(im_norm_flat,(t_steps,h,w,channels))
+		del im_norm_flat
+		deb.prints(im_norm.shape)
+		#for t_step in range(t_steps):
+		#	print("Normalized time",t_step)
+		#	print(np.min(im_norm[t_step]),np.max(im_norm[t_step]),np.average(im_norm[t_step]))
+		print("FINISHED NORMALIZING, RESULT:")
+		print(np.min(im_norm),np.max(im_norm),np.average(im_norm))
+		return im_norm
+
 	def clip_undesired_values(self, full_ims):
 		full_ims[full_ims>1]=1
 		return full_ims
@@ -286,6 +324,14 @@ class LEM(Dataset):
 		if self.dataSource.name == 'SARSource':
 			self.im_list=['20170612_S1', '20170706_S1', '20170811_S1', '20170916_S1', '20171010_S1', '20171115_S1', '20171209_S1', '20180114_S1', '20180219_S1', '20180315_S1', '20180420_S1', '20180514_S1', '20180619_S1']
 			#self.im_list=['20170706_S1', '20170811_S1', '20170916_S1', '20171010_S1', '20171115_S1', '20171209_S1', '20180114_S1', '20180219_S1', '20180315_S1', '20180420_S1', '20180514_S1', '20180619_S1']
+			# less 2 dates
+			self.im_list=['20170811_S1', '20170916_S1', '20171010_S1', '20171115_S1', '20171209_S1', '20180114_S1', '20180219_S1', '20180315_S1', '20180420_S1', '20180514_S1', '20180619_S1']
+			# less mar 18
+			self.im_list=['20170612_S1', '20170706_S1', '20170811_S1', '20170916_S1', '20171010_S1', '20171115_S1', '20171209_S1', '20180114_S1', '20180219_S1', '20180420_S1', '20180514_S1', '20180619_S1']
+
+			# forecasting mar 18
+			self.im_list=['20170612_S1', '20170706_S1', '20170811_S1', '20170916_S1', '20171010_S1', '20171115_S1', '20171209_S1', '20180114_S1', '20180219_S1', '20180315_S1']
+
 
 			self.label_list=self.im_list.copy()
 		elif self.dataSource.name == 'OpticalSource':

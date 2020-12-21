@@ -38,6 +38,7 @@ class PredictionsLoaderModel(PredictionsLoader):
 		print("============== loading model =============")
 		model=load_model(path_model, compile=False)
 		print("Model", model)
+		print("Loading in data: ",self.path_test+'patches_in.npy')
 		test_in=np.load(self.path_test+'patches_in.npy',mmap_mode='r')
 		test_label=np.load(self.path_test+'patches_label.npy')
 
